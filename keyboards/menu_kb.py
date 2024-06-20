@@ -7,7 +7,7 @@ class MenuCallbackFactory(CallbackData, prefix="menu"):
     action: str
 
 
-def get_main_menu_kb() -> types.InlineKeyboardMarkup:
+def get_menu_kb() -> types.InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="🎥  Скачать видео", callback_data=MenuCallbackFactory(action="download")

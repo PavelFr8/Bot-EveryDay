@@ -1,22 +1,38 @@
 import asyncio
-from aiogram import Bot, Dispatcher
+import logging
+
+from aiogram import Bot, Dispatcher, F
 
 from config_reader import config
+from handlers.menu_handler import main_menu_router
+from handlers.menu_callbacks import menu_callback_router
+from filters.chat_type import ChatTypeFilter
 
-from handlers.main_menu_handler import main_menu_router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+)
 
 
 async def main():
-    bot = Bot(
-        token=config.bot_token.get_secret_value()
-              )
+    bot = Bot(token=config.bot_token.get_secret_value())
+
     dp = Dispatcher()
 
-    dp.include_routers(main_menu_router)
+    # Бот работает только в личных сообщениях.
+    dp.message.filter(ChatTypeFilter(chat_type="private"))
 
-    await bot.delete_webhook(drop_pending_updates=True)
-    print('bot online!')
-    await dp.start_polling(bot)
+    dp.include_routers(main_menu_router)
+    dp.include_routers(menu_callback_router)
+
+    try:
+        logging.info('Bot online!')
+        # Обрабатываем все скопившиеся запросы и запускаем бота.
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    finally:
+        logging.info('Bot stop!')
+        await bot.session.close()
 
 
 if __name__ == "__main__":
