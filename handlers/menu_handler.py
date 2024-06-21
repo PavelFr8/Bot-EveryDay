@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from keyboards.menu_kb import get_menu_kb
@@ -8,6 +9,7 @@ from filters.chat_type import ChatTypeFilter
 main_menu_router = Router()
 
 
+# Обработчик команды /start
 @main_menu_router.message(
     Command("start"),
     ChatTypeFilter(chat_type="private")
@@ -30,10 +32,11 @@ async def start(message: Message):
     )
 
 
+# Обработчик возвращения в главное меню
 @main_menu_router.callback_query(F.data == 'back')
-async def menu(callback: CallbackQuery):
+async def menu(callback: CallbackQuery, state: FSMContext):
     menu_text = (
-        "👋  Привет\\! Вот ты снова в главном меню\\! 🎉\n\n"
+        "👋  Привет\\! Ты снова в главном меню\\! 🎉\n\n"
         "Выбирай, что тебе по душе:\n"
         "*Напоминания* — не пропусти важное\\!\n"
         "*Видео* — смотри, когда захочешь\\!\n"
@@ -41,6 +44,7 @@ async def menu(callback: CallbackQuery):
         "*Прочие функции* — они тоже хороши\\!\n\n"
         "Твой бот\\-помощник всегда рядом\\! ✨"
     )
+    await state.clear()
     await callback.message.edit_text(
         menu_text,
         parse_mode="MarkdownV2",
