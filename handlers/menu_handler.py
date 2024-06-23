@@ -1,10 +1,15 @@
+import logging
+
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from keyboards.menu_kb import get_menu_kb
 from filters.chat_type import ChatTypeFilter
+from db.get_db_data import save_data, get_data_by_id
 
 main_menu_router = Router()
 
@@ -14,7 +19,9 @@ main_menu_router = Router()
     Command("start"),
     ChatTypeFilter(chat_type="private")
 )
-async def start(message: Message):
+async def start(
+        message: Message,
+        session: AsyncSession):
     welcome_text = (
         "Приветствую тебя, путник в мире бесконечных напоминаний и задач\\! 🌟\n\n"
         "Я *Твой Личный Ассистент Бот*, и я здесь, чтобы помочь тебе не забыть о важных вещах в этой суете жизни\\.\n\n"
@@ -30,6 +37,7 @@ async def start(message: Message):
         parse_mode="MarkdownV2",
         reply_markup=get_menu_kb()
     )
+    await save_data(session, message.from_user.id)
 
 
 # Обработчик возвращения в главное меню

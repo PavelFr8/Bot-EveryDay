@@ -20,7 +20,7 @@ class GetUrl(StatesGroup):
 
 # Колбэк для скачивания видео
 @download_callback_router.callback_query(StateFilter(None), MenuCallbackFactory.filter(F.action == "download"))
-async def callbacks_num_change_fab(
+async def callbacks_download(
         callback: types.CallbackQuery,
         callback_data: MenuCallbackFactory,
         state: FSMContext
@@ -35,6 +35,7 @@ async def callbacks_num_change_fab(
     await state.set_state(GetUrl.getting_url)
 
 
+# Колбэк для отправки скачанного видео
 @download_callback_router.message(
     GetUrl.getting_url
 )
@@ -47,10 +48,10 @@ async def video(
         try:
             await state.update_data(url=message.text)
             user_data = await state.get_data()
-            logging.info(user_data['url'])
             video_url = get_video(user_data['url'])
             await message.answer(text="Видео успешно скачано! ✨",
                                  reply_markup=get_download_kb(video_url))
+            await state.clear()
         except:
             await message.answer(
                 text="Ой, кажется, я не могу скачать это видео...",
@@ -61,4 +62,18 @@ async def video(
             text="Кажется, вы прислали не ссылку.",
             reply_markup=get_back_kb()
         )
-    await state.clear()
+
+
+@download_callback_router.callback_query(StateFilter(None), F.data == "download_more")
+async def callbacks_more_video(
+        callback: types.CallbackQuery,
+        state: FSMContext
+):
+    await callback.message.edit_text(
+        '📥 Видео много не бывает\\! \n\n'
+        'Пожалуйста, отправьте мне *ссылку* на видео, '
+        'и я начну процесс загрузки для вас\\. После загрузки, вы сможете его скачать\\!\n\n',
+        parse_mode="MarkdownV2",
+        reply_markup=get_back_kb()
+    )
+    await state.set_state(GetUrl.getting_url)
