@@ -1,10 +1,7 @@
 from aiogram import types
-from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-
-class MenuCallbackFactory(CallbackData, prefix="menu"):
-    action: str
+from bot.cbdata import MenuCallbackFactory
 
 
 def get_menu_kb() -> types.InlineKeyboardMarkup:

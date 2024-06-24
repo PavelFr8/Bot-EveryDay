@@ -5,7 +5,7 @@ import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import UserData
+from bot.db.models import UserData
 
 
 async def get_data_by_id(session: AsyncSession, user_id: int) -> UserData:
@@ -16,10 +16,10 @@ async def get_data_by_id(session: AsyncSession, user_id: int) -> UserData:
     :param user_id: User's Telegram ID
     :return: UserData object (can be empty)
     """
-    game_data_request = await session.execute(
+    data_request = await session.execute(
         select(UserData).where(UserData.user_id == user_id)
     )
-    return game_data_request.scalars().first()
+    return data_request.scalars().first()
 
 
 async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
@@ -33,13 +33,15 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
     user = await session.execute(
         select(UserData).where(UserData.user_id == user_id)
     )
-    if bool(user.all()):
+    user = user.scalars().first()
+    if bool(user):
         logging.info(f'Update user {user_id}')
-        user = user.scalars().first()
         if data:
-            if data['deals']:
-                user.deals_list = user.deals_list + data['deals']
-            if data['notifications']:
+            if user.deals_list:
+                user.deals_list = user.deals_list + "),(" + '0' + f'{data["deals"]}'
+            else:
+                user.deals_list = '0' + f'{data["deals"]}'
+            if user.notification_list:
                 user.notification_list = user.notification_list + data['notifications']
 
     else:

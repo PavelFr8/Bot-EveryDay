@@ -1,5 +1,3 @@
-import logging
-
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -7,9 +5,9 @@ from aiogram.types import Message, CallbackQuery
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from keyboards.menu_kb import get_menu_kb
-from filters.chat_type import ChatTypeFilter
-from db.get_db_data import save_data, get_data_by_id
+from bot.keyboards.menu_kb import get_menu_kb
+from bot.filters.chat_type import ChatTypeFilter
+from bot.db.reqsts import save_data
 
 main_menu_router = Router()
 
@@ -58,3 +56,4 @@ async def menu(callback: CallbackQuery, state: FSMContext):
         parse_mode="MarkdownV2",
         reply_markup=get_menu_kb()
     )
+    await callback.answer()

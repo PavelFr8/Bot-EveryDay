@@ -1,27 +1,24 @@
 import asyncio
 import logging
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import select
 
-from config_reader import config
-from handlers.menu_handler import main_menu_router
-from handlers.menu_callbacks import menu_callback_router
-from handlers.download_callback import download_callback_router
-from filters.chat_type import ChatTypeFilter
-from middlewares.middleware_db import DbSessionMiddleware
-from db.base import Base
-
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from db.models import UserData
+from bot.config_reader import config
+from bot.handlers.menu_handler import main_menu_router
+from bot.handlers.menu_callbacks import menu_callback_router
+from bot.handlers.callbacks.download_callback import download_callback_router
+from bot.handlers.callbacks.plan_callback import plan_callback_router
+from bot.filters.chat_type import ChatTypeFilter
+from bot.middlewares.middleware_db import DbSessionMiddleware
 
 
 async def main():
-    # Включаем логирование.
+    # Run logging
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
@@ -29,7 +26,10 @@ async def main():
     # Creating DB engine for MySQL
     engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
-    '''
+
+    from bot.db.base import Base
+    from bot.db.models import UserData
+
     async def create_tables():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -43,9 +43,12 @@ async def main():
                 print(f"Deals List: {data.deals_list}")
                 print(f"Notification List: {data.notification_list}")
 
-    # Вызов функции для создания таблиц
-    await create_tables()
-    '''
+    async def clear_table(table_class):
+        async with engine.begin() as conn:
+            await conn.run_sync(lambda conn: conn.execute(table_class.__table__.delete()))
+
+    # await clear_table(UserData)
+    # await create_tables()
     # Creating DB connections pool
 
     # Creating bot and its dispatcher
@@ -57,14 +60,16 @@ async def main():
 
     # Register middlewares
     dp.message.middleware(DbSessionMiddleware(db_pool))
+    dp.callback_query.middleware(DbSessionMiddleware(db_pool))
 
     dp.include_routers(main_menu_router)
     dp.include_routers(menu_callback_router)
     dp.include_routers(download_callback_router)
+    dp.include_routers(plan_callback_router)
 
     try:
         logging.info('Bot online!')
-        # Обрабатываем все скопившиеся запросы и запускаем бота.
+        # Work with all requests to bot and run bot
         await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
     finally:
         logging.info('Bot stop!')

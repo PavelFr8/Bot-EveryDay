@@ -6,14 +6,15 @@ from aiogram.fsm.context import FSMContext
 import re
 import logging
 
-from keyboards.menu_kb import MenuCallbackFactory
-from keyboards.download_kb import get_download_kb
-from keyboards.back_kb import get_back_kb
-from api.get_video import get_video
+from bot.cbdata import MenuCallbackFactory
+from bot.keyboards.download_kb import get_download_kb
+from bot.keyboards.back_kb import get_back_kb
+from bot.api.get_video import get_video
 
 download_callback_router = Router()
 
 
+# Класс для диалога про скачивание видео
 class GetUrl(StatesGroup):
     getting_url = State()
 
@@ -32,10 +33,11 @@ async def callbacks_download(
         parse_mode="MarkdownV2",
         reply_markup=get_back_kb()
     )
+    await callback.answer()
     await state.set_state(GetUrl.getting_url)
 
 
-# Колбэк для отправки скачанного видео
+# Обработчик для отправки скачанного видео
 @download_callback_router.message(
     GetUrl.getting_url
 )
@@ -52,11 +54,12 @@ async def video(
             await message.answer(text="Видео успешно скачано! ✨",
                                  reply_markup=get_download_kb(video_url))
             await state.clear()
-        except:
+        except Exception as e:
             await message.answer(
                 text="Ой, кажется, я не могу скачать это видео...",
                 reply_markup=get_back_kb()
             )
+            logging.error(f'Bot fail downloading video: {e}')
     else:
         await message.answer(
             text="Кажется, вы прислали не ссылку.",
@@ -77,3 +80,4 @@ async def callbacks_more_video(
         reply_markup=get_back_kb()
     )
     await state.set_state(GetUrl.getting_url)
+    await callback.answer()
