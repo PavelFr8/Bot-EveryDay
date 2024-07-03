@@ -17,9 +17,11 @@ async def get_data_by_id(session: AsyncSession, user_id: int) -> UserData:
     :return: UserData object (can be empty)
     """
     data_request = await session.execute(
-        select(UserData).where(UserData.user_id == user_id)
+        select(UserData).where(UserData.user_id == str(user_id))
     )
-    return data_request.scalars().first()
+    data: UserData = data_request.scalars().first()
+    data.user_id = int(data.user_id)
+    return data
 
 
 async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
@@ -31,7 +33,7 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
     :param user_id: User's Telegram ID
     """
     user = await session.execute(
-        select(UserData).where(UserData.user_id == user_id)
+        select(UserData).where(UserData.user_id == str(user_id))
     )
     user = user.scalars().first()
     if bool(user):
@@ -47,7 +49,7 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
     else:
         logging.info(f'New user {user_id}')
         entry = UserData()
-        entry.user_id = user_id
+        entry.user_id = str(user_id)
         if data:
             if data['deals']:
                 entry.deals_list = data['deals']
@@ -63,3 +65,16 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
         session.add(entry)
     await session.commit()
     logging.info('Func save_data() stop work')
+
+
+async def get_users(session: AsyncSession):
+    """
+    Send users with plan
+
+    :param session: SQLAlchemy DB session
+    """
+    users = await session.execute(
+        select(UserData).filter(UserData.deals_list != None)
+    )
+    users = users.scalars().all()
+    return users

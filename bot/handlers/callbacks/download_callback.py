@@ -51,6 +51,7 @@ async def video(
             await state.update_data(url=message.text)
             user_data = await state.get_data()
             video_url = get_video(user_data['url'])
+            logging.info(f'{user_data["url"]}')
             await message.answer(text="Видео успешно скачано! ✨",
                                  reply_markup=get_download_kb(video_url))
             await state.clear()

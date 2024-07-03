@@ -1,15 +1,15 @@
 import logging
 
-from aiogram import Router, F
-from aiogram import types
+from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.cbdata import MenuCallbackFactory
-from bot.keyboards.plan_kbs import get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb
-from bot.db.reqsts import get_data_by_id, save_data
+from bot.keyboards.plan_kbs import (get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb,
+                                    get_schedule_kb)
+from bot.db.reqsts import get_data_by_id, save_data, get_users
+from bot.handlers.menu_handler import menu
 
 plan_callback_router = Router()
 
@@ -29,6 +29,7 @@ class GetChanged(StatesGroup):
     choosing_changed = State()
 
 
+# Функция для создания красивого списка задач
 def create_beautiful_plan(data: str):
     text = data.split("),(")
     back_text = ''
@@ -40,6 +41,19 @@ def create_beautiful_plan(data: str):
     return back_text
 
 
+# Функция для создания красивого списка НЕ ВЫПОЛНЕННЫХ задач
+def create_plan_for_schedules(data: str):
+    text = data.split("),(")
+    back_text = ''
+    for elem in text:
+        if bool(int(elem[0])):
+            back_text += ''
+        else:
+            back_text += "<b>•</b>  " + elem[1:] + '\n'
+    return back_text
+
+
+# Функция для создания красивого пронумерованного списка задач
 def create_enum_plan(data: str):
     text = data.split("),(")
     back_text = ''
@@ -210,3 +224,59 @@ async def get_change_deal(
         reply_markup=get_done_kb()
     )
     await state.clear()
+
+
+# Ежедневная функция оповещения о невыполненных задачах
+async def scheduled_task(
+        session_factory,
+        bot
+):
+    async with session_factory() as session:
+        users = await get_users(session)
+        for user in users:
+            if user.deals_list:
+                chat_id = user.user_id
+                data = await get_data_by_id(session, chat_id)
+                deals_list = create_plan_for_schedules(data.deals_list)
+                await bot.send_message(chat_id,
+                                       f"<b>Сегодня вы отлично поработали!</b> ⚡️\n\n "
+                                       f"Я заметил, что вы не успели выполнить некоторые задачи. Если хотите, я могу"
+                                       f" <b>добавить</b> их в план на текущий день.\n\n "
+                                       f"<b>Вот задачи, которые не были выполнены:</b>\n  {deals_list}",
+                                       parse_mode='HTML',
+                                       reply_markup=get_schedule_kb()
+                                       )
+
+
+# Колбэк на добавление старых задач в новый список
+@plan_callback_router.callback_query(F.data == 'add_plan_schedule')
+async def add_old_plan(
+        callback: types.CallbackQuery,
+        session: AsyncSession,
+        state: FSMContext):
+    data = await get_data_by_id(session, callback.from_user.id)
+    text = data.deals_list.split("),(")
+    back_text = ''
+    for elem in text:
+        if bool(int(elem[0])):
+            back_text += ""
+        else:
+            back_text += elem + " "
+    back_text = "),(".join(back_text.split())
+    data.deals_list = back_text
+    await session.commit()
+    await callback.answer()
+    await menu(callback, state)
+
+
+# Колбэк на отказ от добавление старых задач в новый список
+@plan_callback_router.callback_query(F.data == 'del_plan_schedule')
+async def add_old_plan(
+        callback: types.CallbackQuery,
+        session: AsyncSession,
+        state: FSMContext):
+    data = await get_data_by_id(session, callback.from_user.id)
+    data.deals_list = ''
+    await session.commit()
+    await callback.answer()
+    await menu(callback, state)

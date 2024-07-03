@@ -65,3 +65,16 @@ def get_done_kb() -> types.InlineKeyboardMarkup:
         text="✅  Готово", callback_data='done_deal'
     )
     return builder.as_markup()
+
+
+def get_schedule_kb() -> types.InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text="❌  Удалить",
+        callback_data='del_plan_schedule'
+    )
+    builder.button(
+        text="📝  Добавить",
+        callback_data="add_plan_schedule"
+    )
+    return builder.as_markup()
