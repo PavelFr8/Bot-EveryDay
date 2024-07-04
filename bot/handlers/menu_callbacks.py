@@ -8,20 +8,6 @@ from bot.keyboards.back_kb import get_back_kb
 menu_callback_router = Router()
 
 
-# Колбэк для напоминаний
-@menu_callback_router.callback_query(MenuCallbackFactory.filter(F.action == "reminder"))
-async def callbacks_reminder(
-        callback: types.CallbackQuery,
-        callback_data: MenuCallbackFactory
-):
-    await callback.message.edit_text(
-        '🔔 Нужно напоминание\\? *Не проблема\\!* \n\nУкажите время и событие, '
-        'и я убедусь, что вы не пропустите ничего важного\\. Ваш личный органайзер всегда под рукой\\! ⏰',
-        parse_mode="MarkdownV2",
-        reply_markup=get_back_kb()
-    )
-
-
 # Колбэк для других запросов
 @menu_callback_router.callback_query(MenuCallbackFactory.filter(F.action == "other"))
 async def callbacks_other(

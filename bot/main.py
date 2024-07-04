@@ -14,10 +14,10 @@ from bot.handlers.menu_handler import main_menu_router
 from bot.handlers.menu_callbacks import menu_callback_router
 from bot.handlers.callbacks.download_callback import download_callback_router
 from bot.handlers.callbacks.plan_callback import plan_callback_router
+from bot.handlers.callbacks.notification_callback import notification_callback_router
 from bot.filters.chat_type import ChatTypeFilter
 from bot.middlewares.middleware_db import DbSessionMiddleware
 from bot.handlers.callbacks.plan_callback import scheduled_task
-from bot.db.reqsts import get_users
 
 
 async def main():
@@ -69,14 +69,15 @@ async def main():
     dp.include_routers(menu_callback_router)
     dp.include_routers(download_callback_router)
     dp.include_routers(plan_callback_router)
+    dp.include_routers(notification_callback_router)
 
     scheduler = AsyncIOScheduler()
 
     # scheduler.add_job(scheduled_task, 'interval', seconds=10, args=[db_pool, bot])
     scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot])
-    scheduler.start()
 
     try:
+        scheduler.start()
         logging.info('Bot online!')
         # Work with all requests to bot and run bot
         await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
