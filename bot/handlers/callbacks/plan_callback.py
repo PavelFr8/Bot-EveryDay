@@ -73,7 +73,8 @@ def create_enum_plan(data: str):
 @plan_callback_router.callback_query(MenuCallbackFactory.filter(F.action == "plan"))
 async def callbacks_plan(
         callback: types.CallbackQuery,
-        session: AsyncSession):
+        session: AsyncSession,
+        state: FSMContext):
     data = await get_data_by_id(session, callback.from_user.id)
     if data.deals_list:
         deals_list = create_beautiful_plan(data.deals_list)
@@ -91,6 +92,7 @@ async def callbacks_plan(
             reply_markup=get_default_plan_kb()
         )
     await callback.answer()
+    await state.clear()
 
 
 # Колбэк на создание плана на день
