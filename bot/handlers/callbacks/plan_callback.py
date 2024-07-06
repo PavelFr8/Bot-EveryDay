@@ -135,7 +135,7 @@ async def add_deal(
         session: AsyncSession):
     fsm_data = await state.get_data()
     fsm_data["deals"] = message.text
-    fsm_data["notifications"] = None
+    fsm_data["notifications"] = ''
     await save_data(session, message.from_user.id, fsm_data)
     await message.answer(
         "*Отлично\\!* \nЯ добавил задачу в план на день\\! ⚡️",
@@ -263,15 +263,15 @@ async def add_old_plan(
         if bool(int(elem[0])):
             back_text += ""
         else:
-            back_text += elem + " "
-    back_text = "),(".join(back_text.split())
+            back_text += elem + "),("
+    back_text = "),(".join(back_text[:-3].split("),("))
     data.deals_list = back_text
     await session.commit()
     await callback.answer()
     await menu(callback, state)
 
 
-# Колбэк на отказ от добавление старых задач в новый список
+# Колбэк на отказ от добавления старых задач в новый список
 @plan_callback_router.callback_query(F.data == 'del_plan_schedule')
 async def add_old_plan(
         callback: types.CallbackQuery,

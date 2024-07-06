@@ -44,7 +44,7 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
             else:
                 user.deals_list = '0' + f'{data["deals"]}'
             if user.notification_list:
-                user.notification_list = user.notification_list + data['notifications']
+                user.notification_list = user.notification_list + "),(" + data['notifications']
             else:
                 user.notification_list = data['notifications']
 
