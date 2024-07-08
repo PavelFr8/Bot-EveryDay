@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from bot.config_reader import config
 from bot.handlers.menu_handler import main_menu_router
-from bot.handlers.menu_callbacks import menu_callback_router
+from bot.handlers.callbacks.settings_callback import settings_callback_router
 from bot.handlers.callbacks.download_callback import download_callback_router
 from bot.handlers.callbacks.plan_callback import plan_callback_router
 from bot.handlers.callbacks.notification_callback import notification_callback_router
@@ -51,17 +51,17 @@ async def main():
     # Register middlewares
     dp.message.middleware(DbSessionMiddleware(db_pool))
     dp.callback_query.middleware(DbSessionMiddleware(db_pool))
-    dp.message.middleware(SchedulerMiddleware(scheduler))
     dp.callback_query.middleware(SchedulerMiddleware(scheduler))
     dp.callback_query.middleware(BotMiddleware(bot))
 
     # Register routers
     dp.include_routers(main_menu_router)
-    dp.include_routers(menu_callback_router)
+    dp.include_routers(settings_callback_router)
     dp.include_routers(download_callback_router)
     dp.include_routers(plan_callback_router)
     dp.include_routers(notification_callback_router)
 
+    # Register job in scheduler
     scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot])
 
     try:

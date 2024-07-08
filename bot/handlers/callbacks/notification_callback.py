@@ -24,10 +24,12 @@ class GetNotification(StatesGroup):
     getting_time = State()
 
 
+# функция для отправки напоминания через scheduler
 async def new_notification(
         data: Dict,
         bot: Bot,
         session: AsyncSession):
+    # отправляем напоминание
     notification = data["notifications"][2:]
     message: types.Message = data["message"]
     reminder_text = f"📅  У вас новое <b>напоминание</b>:\n\n<i>{notification}</i>\n\nЯ всегда рад вам помочь! 🌟"
@@ -36,7 +38,9 @@ async def new_notification(
                            reminder_text,
                            parse_mode="HTML")
 
+    # удаление напоминания из БД
     tmp_data = await get_data_by_id(session, message.from_user.id)
+
     tmp_data.notification_list = tmp_data.notification_list.replace(data["notifications"], '')
     tmp_data.notification_list = tmp_data.notification_list.replace("),(),(", '),(')
     if tmp_data.notification_list == '),(':
@@ -44,9 +48,11 @@ async def new_notification(
     tmp_data.notification_list = tmp_data.notification_list.strip()
     if tmp_data.notification_list[-3:] == '),(':
         tmp_data.notification_list = tmp_data.notification_list[:-3]
+
     await session.commit()
 
 
+# функция для составления красивого списка текущих напоминаний
 def create_beautiful_notifications(notf_list):
     data = notf_list.split("),(")
     data_list = ''

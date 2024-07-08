@@ -38,6 +38,28 @@ async def start(
     await save_data(session, message.from_user.id)
 
 
+# Обработчик команды /menu
+@main_menu_router.message(
+    Command("menu"),
+    ChatTypeFilter(chat_type="private"))
+async def main_menu(message: Message, state: FSMContext):
+    menu_text = (
+        "👋  Привет\\! Ты снова в главном меню\\! 🎉\n\n"
+        "Выбирай, что тебе по душе:\n"
+        "*Напоминания* — не пропусти важное\\!\n"
+        "*Видео* — смотри, когда захочешь\\!\n"
+        "*Планировщик* — организуй свой день\\!\n"
+        "*Прочие функции* — они тоже хороши\\!\n\n"
+        "Твой бот\\-помощник всегда рядом\\! ✨"
+    )
+    await state.clear()
+    await message.answer(
+        menu_text,
+        parse_mode="MarkdownV2",
+        reply_markup=get_menu_kb()
+    )
+
+
 # Обработчик возвращения в главное меню
 @main_menu_router.callback_query(F.data == 'back')
 async def menu(callback: CallbackQuery, state: FSMContext):

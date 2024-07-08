@@ -7,8 +7,7 @@ import re
 import logging
 
 from bot.cbdata import MenuCallbackFactory
-from bot.keyboards.download_kb import get_download_kb
-from bot.keyboards.back_kb import get_back_kb
+from bot.keyboards.download_kb import get_download_kb, get_back_kb
 from bot.api.get_video import get_video
 
 download_callback_router = Router()

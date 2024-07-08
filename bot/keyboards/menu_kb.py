@@ -16,7 +16,7 @@ def get_menu_kb() -> types.InlineKeyboardMarkup:
         text="📅  План на день", callback_data=MenuCallbackFactory(action="plan")
     )
     builder.button(
-        text="✨  Другие функции", callback_data=MenuCallbackFactory(action="other")
+        text="⚙️  Настройки", callback_data=MenuCallbackFactory(action="settings")
     )
     builder.adjust(2)
     return builder.as_markup()
