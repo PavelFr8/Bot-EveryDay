@@ -37,10 +37,6 @@ async def main():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
-    async def clear_table(table_class):
-        async with engine.begin() as conn:
-            await conn.run_sync(lambda conn: conn.execute(table_class.__table__.delete()))
-
     # await clear_table(UserData)
     # await create_tables()
 

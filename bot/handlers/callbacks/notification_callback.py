@@ -1,5 +1,7 @@
 from typing import Dict
 
+from datetime import datetime, timedelta
+
 from aiogram import Router, F, Bot
 from aiogram import types
 from aiogram.fsm.context import FSMContext
@@ -10,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.cbdata import MenuCallbackFactory
 from bot.keyboards.notification_kb import get_default_notification_kb, get_back_kb, get_time_kb, get_done_kb
-from bot.db.reqsts import get_data_by_id, get_users, save_data
+from bot.db.reqsts import get_data_by_id, save_data
 
 
 notification_callback_router = Router()
@@ -24,12 +26,25 @@ class GetNotification(StatesGroup):
 
 async def new_notification(
         data: Dict,
-        bot: Bot):
+        bot: Bot,
+        session: AsyncSession):
     notification = data["notifications"][2:]
     message: types.Message = data["message"]
+    reminder_text = f"📅  У вас новое <b>напоминание</b>:\n\n<i>{notification}</i>\n\nЯ всегда рад вам помочь! 🌟"
+
     await bot.send_message(message.from_user.id,
-                           notification,
-                           reply_markup=get_back_kb())
+                           reminder_text,
+                           parse_mode="HTML")
+
+    tmp_data = await get_data_by_id(session, message.from_user.id)
+    tmp_data.notification_list = tmp_data.notification_list.replace(data["notifications"], '')
+    tmp_data.notification_list = tmp_data.notification_list.replace("),(),(", '),(')
+    if tmp_data.notification_list == '),(':
+        tmp_data.notification_list = ''
+    tmp_data.notification_list = tmp_data.notification_list.strip()
+    if tmp_data.notification_list[-3:] == '),(':
+        tmp_data.notification_list = tmp_data.notification_list[:-3]
+    await session.commit()
 
 
 def create_beautiful_notifications(notf_list):
@@ -43,7 +58,7 @@ def create_beautiful_notifications(notf_list):
             time = '5 минут'
         else:
             time = f'{time} минут'
-        data_list += "• " + elem[1:] + f" (Режим: {time})" + "\n"
+        data_list += "• " + elem[2:] + f" (Режим: {time})" + "\n"
     return data_list
 
 
@@ -143,8 +158,6 @@ async def add_time(
     fsm_data["message"] = message
     if text == '05':
         text = 5
-    job = scheduler.add_job(new_notification, 'interval', seconds=int(text),
-                      args=[fsm_data, bot])
-    job_id = job.id
-    # scheduler.remove_job(job_id)
+    run_time = datetime.now() + timedelta(minutes=int(text))
+    scheduler.add_job(new_notification, 'date', run_date=run_time, args=[fsm_data, bot, session])
     await state.set_state(GetNotification.getting_time)

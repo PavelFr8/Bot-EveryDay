@@ -261,10 +261,10 @@ async def add_old_plan(
     back_text = ''
     for elem in text:
         if bool(int(elem[0])):
-            back_text += ""
+            pass
         else:
             back_text += elem + "),("
-    back_text = "),(".join(back_text[:-3].split("),("))
+    back_text = back_text[:-3]
     data.deals_list = back_text
     await session.commit()
     await callback.answer()
