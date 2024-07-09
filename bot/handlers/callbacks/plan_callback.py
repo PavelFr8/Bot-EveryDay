@@ -236,7 +236,7 @@ async def scheduled_task(
     async with session_factory() as session:
         users = await get_users(session)
         for user in users:
-            if user.deals_list:
+            if user.deals_list and user.notifications_state:
                 chat_id = user.user_id
                 data = await get_data_by_id(session, chat_id)
                 deals_list = create_plan_for_schedules(data.deals_list)

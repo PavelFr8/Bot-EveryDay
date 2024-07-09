@@ -37,7 +37,6 @@ async def main():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
-    # await clear_table(UserData)
     # await create_tables()
 
     # Creating bot and its dispatcher
