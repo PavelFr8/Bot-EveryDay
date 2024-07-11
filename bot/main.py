@@ -27,10 +27,12 @@ async def main():
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
     )
+
     # Creating DB engine for MySQL
     engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
 
+    '''
     from bot.db.base import Base
 
     async def create_tables():
@@ -38,6 +40,7 @@ async def main():
             await conn.run_sync(Base.metadata.create_all)
 
     # await create_tables()
+    '''
 
     # Creating bot and its dispatcher
     bot = Bot(token=config.bot_token.get_secret_value())
@@ -51,6 +54,7 @@ async def main():
     dp.message.middleware(DbSessionMiddleware(db_pool))
     dp.callback_query.middleware(DbSessionMiddleware(db_pool))
     dp.callback_query.middleware(SchedulerMiddleware(scheduler))
+    dp.message.middleware(SchedulerMiddleware(scheduler))
     dp.callback_query.middleware(BotMiddleware(bot))
 
     # Register routers
@@ -61,8 +65,7 @@ async def main():
     dp.include_routers(notification_callback_router)
 
     # Register job in scheduler
-    scheduler.add_job(scheduled_task, 'interval', seconds=5, args=[db_pool, bot, scheduler])
-    # scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot, scheduler])
+    scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot, scheduler])
 
     try:
         logging.info('Bot online!')
@@ -74,5 +77,4 @@ async def main():
         await bot.session.close()
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
