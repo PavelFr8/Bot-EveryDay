@@ -61,7 +61,8 @@ async def main():
     dp.include_routers(notification_callback_router)
 
     # Register job in scheduler
-    scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot])
+    scheduler.add_job(scheduled_task, 'interval', seconds=5, args=[db_pool, bot, scheduler])
+    # scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot, scheduler])
 
     try:
         logging.info('Bot online!')

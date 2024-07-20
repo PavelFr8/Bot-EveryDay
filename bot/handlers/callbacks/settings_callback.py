@@ -37,6 +37,7 @@ async def callbacks_settings(
     await state.clear()
 
 
+# Колбэк на изменение статуса ежедневных уведомлений
 @settings_callback_router.callback_query(F.data == 'change_notf_state')
 async def change_notification_state(
         callback: types.CallbackQuery,
@@ -52,6 +53,7 @@ async def change_notification_state(
     await callbacks_settings(callback, state, session)
 
 
+# Колбэк для изменения часового пояса
 @settings_callback_router.callback_query(F.data == 'change_timezone')
 async def change_timezone(
         callback: types.CallbackQuery,
@@ -70,6 +72,7 @@ async def change_timezone(
     )
 
 
+# Обработчик на сообщение с данными для изменения часового пояса
 @settings_callback_router.message(GetTimezone.getting_timezome)
 async def get_new_timezone(
         message: types.Message,
@@ -88,7 +91,7 @@ async def get_new_timezone(
                 '*Отлично, часовой пояс успешно изменён\\!* 🕑\n'
                 "*Пример сообщения: _\\+3_*",
                 parse_mode="MarkdownV2",
-                reply_markup=get_back_kb()
+                reply_markup=get_done_kb()
             )
         else:
             await message.answer(

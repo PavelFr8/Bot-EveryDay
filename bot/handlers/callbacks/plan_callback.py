@@ -1,8 +1,11 @@
-import logging
+from datetime import datetime, timedelta
+from pytz import utc
 
-from aiogram import Router, F, types
+
+from aiogram import Router, F, types, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.cbdata import MenuCallbackFactory
@@ -229,25 +232,31 @@ async def get_change_deal(
 
 
 # Ежедневная функция оповещения о невыполненных задачах
-async def scheduled_task(
-        session_factory,
-        bot
-):
+async def scheduled_task(session_factory, bot, scheduler):
     async with session_factory() as session:
         users = await get_users(session)
         for user in users:
             if user.deals_list and user.notifications_state:
-                chat_id = user.user_id
-                data = await get_data_by_id(session, chat_id)
-                deals_list = create_plan_for_schedules(data.deals_list)
-                await bot.send_message(chat_id,
-                                       f"<b>Сегодня вы отлично поработали!</b> ⚡️\n\n "
-                                       f"Я заметил, что вы не успели выполнить некоторые задачи. Если хотите, я могу"
-                                       f" <b>добавить</b> их в план на текущий день.\n\n "
-                                       f"<b>Вот задачи, которые не были выполнены:</b>\n  {deals_list}",
-                                       parse_mode='HTML',
-                                       reply_markup=get_schedule_kb()
-                                       )
+                run_time = datetime.now(utc) + timedelta(hours=user.timezone)
+                run_time = run_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
+                if datetime.now(utc) > run_time:
+                    run_time += timedelta(days=1)
+
+                scheduler.add_job(send_message, 'date', run_date=run_time, args=[bot, session, user.user_id])
+
+
+# Ежедневная функция оповещения о невыполненных задачах
+async def send_message(bot, session, chat_id):
+    data = await get_data_by_id(session, chat_id)
+    deals_list = create_plan_for_schedules(data.deals_list)
+    await bot.send_message(chat_id,
+                           f"<b>Сегодня вы отлично поработали!</b> ⚡️\n\n"
+                           f"Я заметил, что вы не успели выполнить некоторые задачи. Если хотите, я могу"
+                           f" <b>добавить</b> их в план на текущий день.\n\n"
+                           f"<b>Вот задачи, которые не были выполнены:</b>\n  {deals_list}",
+                           parse_mode='HTML',
+                           reply_markup=get_schedule_kb())
 
 
 # Колбэк на добавление старых задач в новый список
