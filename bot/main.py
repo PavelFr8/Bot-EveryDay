@@ -28,7 +28,7 @@ async def main():
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
     )
 
-    # Creating DB engine for MySQL
+    # Creating DB engine for PostgreSQL
     engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
 
