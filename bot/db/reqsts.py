@@ -5,7 +5,7 @@ import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.db.models import UserData
+from db.models import UserData
 
 
 async def get_data_by_id(session: AsyncSession, user_id: int) -> UserData:

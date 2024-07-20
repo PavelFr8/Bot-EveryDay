@@ -8,17 +8,17 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from bot.config_reader import config
-from bot.handlers.menu_handler import main_menu_router
-from bot.handlers.callbacks.settings_callback import settings_callback_router
-from bot.handlers.callbacks.download_callback import download_callback_router
-from bot.handlers.callbacks.plan_callback import plan_callback_router
-from bot.handlers.callbacks.notification_callback import notification_callback_router
-from bot.handlers.callbacks.plan_callback import scheduled_task
-from bot.middlewares.middleware_db import DbSessionMiddleware
-from bot.middlewares.middleware_scheduler import SchedulerMiddleware
-from bot.middlewares.middleware_bot import BotMiddleware
-from bot.filters.chat_type import ChatTypeFilter
+from config_reader import config
+from handlers.menu_handler import main_menu_router
+from handlers.callbacks.settings_callback import settings_callback_router
+from handlers.callbacks.download_callback import download_callback_router
+from handlers.callbacks.plan_callback import plan_callback_router
+from handlers.callbacks.notification_callback import notification_callback_router
+from handlers.callbacks.plan_callback import scheduled_task
+from middlewares.middleware_db import DbSessionMiddleware
+from middlewares.middleware_scheduler import SchedulerMiddleware
+from middlewares.middleware_bot import BotMiddleware
+from filters.chat_type import ChatTypeFilter
 
 
 async def main():

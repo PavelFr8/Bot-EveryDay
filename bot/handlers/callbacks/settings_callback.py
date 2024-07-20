@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import re
 import logging
 
-from bot.cbdata import MenuCallbackFactory
-from bot.keyboards.settings_kb import get_settings_kb, get_back_kb, get_done_kb
-from bot.db.reqsts import get_data_by_id
+from cbdata import MenuCallbackFactory
+from keyboards.settings_kb import get_settings_kb, get_back_kb, get_done_kb
+from db.reqsts import get_data_by_id
 
 settings_callback_router = Router()
 

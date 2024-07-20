@@ -8,11 +8,11 @@ from aiogram.fsm.state import StatesGroup, State
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.cbdata import MenuCallbackFactory
-from bot.keyboards.plan_kbs import (get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb,
+from cbdata import MenuCallbackFactory
+from keyboards.plan_kbs import (get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb,
                                     get_schedule_kb)
-from bot.db.reqsts import get_data_by_id, save_data, get_users
-from bot.handlers.menu_handler import menu
+from db.reqsts import get_data_by_id, save_data, get_users
+from handlers.menu_handler import menu
 
 plan_callback_router = Router()
 

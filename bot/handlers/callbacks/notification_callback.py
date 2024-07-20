@@ -10,9 +10,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.cbdata import MenuCallbackFactory
-from bot.keyboards.notification_kb import get_default_notification_kb, get_back_kb, get_time_kb, get_done_kb
-from bot.db.reqsts import get_data_by_id, save_data
+from cbdata import MenuCallbackFactory
+from keyboards.notification_kb import get_default_notification_kb, get_back_kb, get_time_kb, get_done_kb
+from db.reqsts import get_data_by_id, save_data
 
 
 notification_callback_router = Router()
