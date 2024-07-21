@@ -1,5 +1,4 @@
 import asyncio
-import logging
 
 from aiohttp import web
 
@@ -12,36 +11,23 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from config_reader import config
-from handlers.menu_handler import main_menu_router
-from handlers.callbacks.settings_callback import settings_callback_router
-from handlers.callbacks.download_callback import download_callback_router
-from handlers.callbacks.plan_callback import plan_callback_router, scheduled_task
-from handlers.callbacks.notification_callback import notification_callback_router
-from middlewares.middleware_db import DbSessionMiddleware
-from middlewares.middleware_scheduler import SchedulerMiddleware
-from middlewares.middleware_bot import BotMiddleware
-from filters.chat_type import ChatTypeFilter
+from bot.config_reader import config
+from bot.handlers.menu_handler import main_menu_router
+from bot.handlers.callbacks.settings_callback import settings_callback_router
+from bot.handlers.callbacks.download_callback import download_callback_router
+from bot.handlers.callbacks.plan_callback import plan_callback_router, scheduled_task
+from bot.handlers.callbacks.notification_callback import notification_callback_router
+from bot.middlewares.middleware_db import DbSessionMiddleware
+from bot.middlewares.middleware_scheduler import SchedulerMiddleware
+from bot.middlewares.middleware_bot import BotMiddleware
+from bot.filters.chat_type import ChatTypeFilter
+from bot import logger
 
 
 async def main():
-    # Configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
-    )
-
     # Creating DB engine for PostgreSQL
     engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
-
-    '''
-    from db.base import Base
-    async def create_tables():
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-    await create_tables()
-    '''
 
     # Creating bot and its dispatcher
     bot = Bot(token=config.bot_token.get_secret_value())
@@ -73,7 +59,7 @@ async def main():
     webhook_url = f"https://bot-everyday.onrender.com/webhook"  # Replace with your domain
     await bot.set_webhook(webhook_url)
 
-    logging.info('Bot online!')
+    await logger.info('Bot online!')
     scheduler.start()
 
     # Start the HTTP server
@@ -90,9 +76,9 @@ async def main():
     try:
         await asyncio.Event().wait()  # Keep the service running
     except (KeyboardInterrupt, SystemExit):
-        logging.warning('Bot stopped!')
+        await logger.warning('Bot stopped!')
     except Exception as e:
-        logging.error(f'Unexpected error: {e}', exc_info=True)
+        await logger.error(f'Unexpected error: {e}', exc_info=True)
     finally:
         await bot.session.close()
         await engine.dispose()

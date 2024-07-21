@@ -4,11 +4,11 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 import re
-import logging
+from bot import logger
 
-from cbdata import MenuCallbackFactory
-from keyboards.download_kb import get_download_kb, get_back_kb
-from api.get_video import get_video
+from bot.cbdata import MenuCallbackFactory
+from bot.keyboards.download_kb import get_download_kb, get_back_kb
+from bot.api.get_video import get_video
 
 download_callback_router = Router()
 
@@ -59,7 +59,7 @@ async def video(
                 text="Ой, кажется, я не могу скачать это видео...",
                 reply_markup=get_back_kb()
             )
-            logging.error(f'Bot fail downloading video: {e}')
+            logger.error(f'Bot fail downloading video: {e}')
     else:
         await message.answer(
             text="Кажется, вы прислали не ссылку.",

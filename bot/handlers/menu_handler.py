@@ -5,9 +5,9 @@ from aiogram.types import Message, CallbackQuery
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from keyboards.menu_kb import get_menu_kb
-from filters.chat_type import ChatTypeFilter
-from db.reqsts import save_data
+from bot.keyboards.menu_kb import get_menu_kb
+from bot.filters.chat_type import ChatTypeFilter
+from bot.db.reqsts import save_data
 
 main_menu_router = Router()
 

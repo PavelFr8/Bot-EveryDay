@@ -1,19 +1,17 @@
 from datetime import datetime, timedelta
 from pytz import utc
 
-
-from aiogram import Router, F, types, Bot
+from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cbdata import MenuCallbackFactory
-from keyboards.plan_kbs import (get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb,
+from bot.cbdata import MenuCallbackFactory
+from bot.keyboards.plan_kbs import (get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb,
                                     get_schedule_kb)
-from db.reqsts import get_data_by_id, save_data, get_users
-from db.models import UserData
-from handlers.menu_handler import menu
+from bot.db.reqsts import get_data_by_id, save_data, get_users
+from bot.db.models import UserData
+from bot.handlers.menu_handler import menu
 
 plan_callback_router = Router()
 
