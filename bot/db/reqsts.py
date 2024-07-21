@@ -39,11 +39,11 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
     if bool(user):
         logging.info(f'Update user {user_id}')
         if data:
-            if user.deals_list:
+            if data["deals"]:
                 user.deals_list = user.deals_list + "),(" + '0' + f'{data["deals"]}'
             else:
                 user.deals_list = '0' + f'{data["deals"]}'
-            if user.notification_list:
+            if data['notifications']:
                 user.notification_list = user.notification_list + "),(" + data['notifications']
             else:
                 user.notification_list = data['notifications']
