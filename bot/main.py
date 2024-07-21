@@ -24,7 +24,7 @@ from filters.chat_type import ChatTypeFilter
 async def main():
     # Run logging
     logging.basicConfig(
-        level=logging.ERROR,
+        level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
     )
 
@@ -33,13 +33,13 @@ async def main():
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
 
     '''
-    from bot.db.base import Base
+    from db.base import Base
 
     async def create_tables():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
-    # await create_tables()
+    await create_tables()
     '''
 
     # Creating bot and its dispatcher

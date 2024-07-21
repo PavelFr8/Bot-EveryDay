@@ -40,6 +40,7 @@ async def new_notification(
 
     # удаление напоминания из БД
     tmp_data = await get_data_by_id(session, message.from_user.id)
+    tmp_data.user_id = str(tmp_data.user_id)
 
     tmp_data.notification_list = tmp_data.notification_list.replace(data["notifications"], '')
     tmp_data.notification_list = tmp_data.notification_list.replace("),(),(", '),(')

@@ -45,6 +45,7 @@ async def change_notification_state(
         state: FSMContext
 ):
     data = await get_data_by_id(session, callback.from_user.id)
+    data.user_id = str(data.user_id)
     if data.notifications_state:
         data.notifications_state = False
     else:
@@ -84,6 +85,7 @@ async def get_new_timezone(
 
         if 1 <= new_timezone <= 12:
             data = await get_data_by_id(session, message.from_user.id)
+            data.user_id = str(data.user_id)
             data.timezone = new_timezone
             await session.commit()
             await state.clear()
