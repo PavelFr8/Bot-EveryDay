@@ -41,13 +41,8 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
         if data:
             if data["deals"]:
                 user.deals_list = user.deals_list + "),(" + '0' + f'{data["deals"]}'
-            else:
-                user.deals_list = '0' + f'{data["deals"]}'
             if data['notifications']:
                 user.notification_list = user.notification_list + "),(" + data['notifications']
-            else:
-                user.notification_list = data['notifications']
-
     else:
         logging.info(f'New user {user_id}')
         entry = UserData()
