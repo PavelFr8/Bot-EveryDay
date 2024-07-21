@@ -35,7 +35,6 @@ async def main():
     engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
 
-    # Uncomment to create tables if they don't exist
     '''
     from db.base import Base
     async def create_tables():
@@ -74,7 +73,8 @@ async def main():
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path='/webhook')
     setup_application(app, dp, bot=bot)
 
-    webhook_url = f"https://your.server.com/webhook"  # Укажите ваш URL
+    # Use the public URL of your server
+    webhook_url = f"https://bot-everyday.onrender.com/webhook"  # Replace with your domain
     await bot.set_webhook(webhook_url)
 
     logging.info('Bot online!')
@@ -83,7 +83,7 @@ async def main():
     # Start the web server
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8080)  # Bind to port 8080
+    site = web.TCPSite(runner, '0.0.0.0', 8080)  # Bind to port 8080 or the port your hosting provider supports
     await site.start()
 
     try:
