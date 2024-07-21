@@ -1,6 +1,6 @@
 from typing import Dict
 
-import logging
+from bot import logger
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,19 +37,14 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
     )
     user = user.scalars().first()
     if bool(user):
-        logging.info(f'Update user {user_id}')
+        logger.info(f'Update user {user_id}')
         if data:
-            if user.deals_list:
+            if data["deals"] != '':
                 user.deals_list = user.deals_list + "),(" + '0' + f'{data["deals"]}'
-            else:
-                user.deals_list = '0' + f'{data["deals"]}'
-            if user.notification_list:
+            if data['notifications'] != '':
                 user.notification_list = user.notification_list + "),(" + data['notifications']
-            else:
-                user.notification_list = data['notifications']
-
     else:
-        logging.info(f'New user {user_id}')
+        logger.info(f'New user {user_id}')
         entry = UserData()
         entry.user_id = str(user_id)
         if data:
@@ -65,8 +60,10 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
             entry.deals_list = ''
             entry.notification_list = ''
         session.add(entry)
-    await session.commit()
-    logging.info('Func save_data() stop work')
+    try:
+        await session.commit()
+    except Exception as e:
+        logger.error(f"Fail to save data: {e}")
 
 
 async def get_users(session: AsyncSession):

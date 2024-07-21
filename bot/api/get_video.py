@@ -1,27 +1,33 @@
-import requests
-import logging
+from aiohttp import ClientSession
+
+from bot import logger
 
 
 # Функция для запросов к Cobalt api
-def get_video(url: str):
-    request_body = {
-        "url": url,
-        "vCodec": "h264",
-        "vQuality": "720",
-        "aFormat": "mp3"
-    }
+async def get_video(video_url: str):
+    async with ClientSession() as sess:
+        url = "https://api.cobalt.tools/api/json"
 
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
+        request_body = {
+            "url": video_url,
+            "vCodec": "h264",
+            "vQuality": "720",
+            "aFormat": "mp3"
+        }
 
-    response = requests.post("https://api.cobalt.tools/api/json", json=request_body, headers=headers)
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+        async with sess.post(url, json=request_body, headers=headers) as response:
+            try:
+                data = await response.json()
+                logger.info('User get video')
+                return data['url']
+            except Exception as e:
+                logger.info(f"Error in request: {e}")
+                raise e
 
-    try:
-        data = response.json()
-        logging.info('User get video')
-        return data['url']
-    except Exception as e:
-        logging.info(f"Error in request: {e}")
-        raise e
+
+if __name__ == "__main__":
+    print(get_video("https://www.youtube.com/watch?v=l4QHVsStASU"))

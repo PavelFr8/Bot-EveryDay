@@ -4,8 +4,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 from sqlalchemy.ext.asyncio import AsyncSession
-import re
-import logging
 
 from bot.cbdata import MenuCallbackFactory
 from bot.keyboards.settings_kb import get_settings_kb, get_back_kb, get_done_kb
@@ -45,6 +43,7 @@ async def change_notification_state(
         state: FSMContext
 ):
     data = await get_data_by_id(session, callback.from_user.id)
+    data.user_id = str(data.user_id)
     if data.notifications_state:
         data.notifications_state = False
     else:
@@ -84,6 +83,7 @@ async def get_new_timezone(
 
         if 1 <= new_timezone <= 12:
             data = await get_data_by_id(session, message.from_user.id)
+            data.user_id = str(data.user_id)
             data.timezone = new_timezone
             await session.commit()
             await state.clear()

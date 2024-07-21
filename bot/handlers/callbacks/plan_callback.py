@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta
 from pytz import utc
 
-
-from aiogram import Router, F, types, Bot
+from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.cbdata import MenuCallbackFactory
 from bot.keyboards.plan_kbs import (get_plan_kb, get_default_plan_kb, get_create_plan_kb, get_back_kb, get_done_kb,
                                     get_schedule_kb)
 from bot.db.reqsts import get_data_by_id, save_data, get_users
+from bot.db.models import UserData
 from bot.handlers.menu_handler import menu
 
 plan_callback_router = Router()
@@ -174,6 +173,7 @@ async def get_del_deal(
         state: FSMContext,
         session: AsyncSession):
     data = await get_data_by_id(session, message.from_user.id)
+    data.user_id = str(data.user_id)
     data.deals_list = data.deals_list.split("),(")
     del data.deals_list[int(message.text) - 1]
     data.deals_list = "),(".join(data.deals_list)
@@ -211,7 +211,8 @@ async def get_change_deal(
         message: types.Message,
         state: FSMContext,
         session: AsyncSession):
-    data = await get_data_by_id(session, message.from_user.id)
+    data: UserData = await get_data_by_id(session, message.from_user.id)
+    data.user_id = str(data.user_id)
     data.deals_list = [(item[0], item[1:]) for item in data.deals_list.strip(")(").split("),(")]
     index = int(message.text) - 1
     deal = list(data.deals_list[index])
@@ -266,6 +267,7 @@ async def add_old_plan(
         session: AsyncSession,
         state: FSMContext):
     data = await get_data_by_id(session, callback.from_user.id)
+    data.user_id = str(data.user_id)
     text = data.deals_list.split("),(")
     back_text = ''
     for elem in text:
@@ -287,6 +289,7 @@ async def add_old_plan(
         session: AsyncSession,
         state: FSMContext):
     data = await get_data_by_id(session, callback.from_user.id)
+    data.user_id = str(data.user_id)
     data.deals_list = ''
     await session.commit()
     await callback.answer()
