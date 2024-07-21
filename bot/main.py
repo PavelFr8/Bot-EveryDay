@@ -1,10 +1,11 @@
 import asyncio
 import logging
 
+from aiohttp import web
+
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-
-from aiohttp import web
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -21,19 +22,6 @@ from middlewares.middleware_db import DbSessionMiddleware
 from middlewares.middleware_scheduler import SchedulerMiddleware
 from middlewares.middleware_bot import BotMiddleware
 from filters.chat_type import ChatTypeFilter
-
-
-async def start_http_server():
-    async def handle(request):
-        return web.Response(text="Bot is running")
-
-    app = web.Application()
-    app.router.add_get('/', handle)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8080)  # Bind to port 8080
-    await site.start()
-    logging.info("HTTP server started on port 8080")
 
 
 async def main():
@@ -72,23 +60,34 @@ async def main():
     dp.callback_query.middleware(BotMiddleware(bot))
 
     # Register routers
-    dp.include_routers(main_menu_router)
-    dp.include_routers(settings_callback_router)
-    dp.include_routers(download_callback_router)
-    dp.include_routers(plan_callback_router)
-    dp.include_routers(notification_callback_router)
+    dp.include_router(main_menu_router)
+    dp.include_router(settings_callback_router)
+    dp.include_router(download_callback_router)
+    dp.include_router(plan_callback_router)
+    dp.include_router(notification_callback_router)
 
     # Register job in scheduler
     scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot, scheduler])
 
     # Start the HTTP server
-    await start_http_server()
+    app = web.Application()
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path='/webhook')
+    setup_application(app, dp, bot=bot)
+
+    webhook_url = f"https://your.server.com/webhook"  # Укажите ваш URL
+    await bot.set_webhook(webhook_url)
+
+    logging.info('Bot online!')
+    scheduler.start()
+
+    # Start the web server
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8080)  # Bind to port 8080
+    await site.start()
 
     try:
-        logging.info('Bot online!')
-        # Work with all requests to bot and run bot
-        scheduler.start()
-        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+        await asyncio.Event().wait()  # Keep the service running
     except (KeyboardInterrupt, SystemExit):
         logging.warning('Bot stopped!')
     except Exception as e:
@@ -96,6 +95,7 @@ async def main():
     finally:
         await bot.session.close()
         await engine.dispose()
+        await runner.cleanup()
 
 if __name__ == "__main__":
     asyncio.run(main())
