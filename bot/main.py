@@ -28,7 +28,7 @@ async def main():
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+        format="%(asctime)s - %(level)s - %(name)s - %(message)s"
     )
 
     # Creating DB engine for PostgreSQL
@@ -68,17 +68,18 @@ async def main():
     # Register job in scheduler
     scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot, scheduler])
 
-    # Start the HTTP server
-    app = web.Application()
-    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path='/webhook')
-    setup_application(app, dp, bot=bot)
-
-    # Use the public URL of your server
+    # Delete existing webhook and set a new one
+    await bot.delete_webhook(drop_pending_updates=True)
     webhook_url = f"https://bot-everyday.onrender.com/webhook"  # Replace with your domain
     await bot.set_webhook(webhook_url)
 
     logging.info('Bot online!')
     scheduler.start()
+
+    # Start the HTTP server
+    app = web.Application()
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path='/webhook')
+    setup_application(app, dp, bot=bot)
 
     # Start the web server
     runner = web.AppRunner(app)
