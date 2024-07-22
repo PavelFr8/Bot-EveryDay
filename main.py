@@ -1,5 +1,7 @@
 import asyncio
 
+import sys
+
 from aiohttp import web
 
 from aiogram import Bot, Dispatcher
@@ -24,7 +26,9 @@ from bot.filters.chat_type import ChatTypeFilter
 from bot import logger
 
 
-async def main():
+async def main(url: str):
+    logger.info("Starting bot...")
+
     # Creating DB engine for PostgreSQL
     engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
@@ -55,11 +59,15 @@ async def main():
     scheduler.add_job(scheduled_task, 'cron', hour=0, minute=0, args=[db_pool, bot, scheduler])
 
     # Delete existing webhook and set a new one
+    logger.info("Setting webhook...")
     await bot.delete_webhook(drop_pending_updates=True)
-    webhook_url = f"https://bot-everyday.onrender.com/webhook"  # Replace with your domain
+
+    # Use ngrok URL for webhook
+    host_url = url
+    webhook_url = f"{host_url}/webhook"
     await bot.set_webhook(webhook_url)
 
-    await logger.info('Bot online!')
+    logger.info('Bot online!')
     scheduler.start()
 
     # Start the HTTP server
@@ -70,19 +78,25 @@ async def main():
     # Start the web server
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8080)  # Bind to port 8080 or the port your hosting provider supports
+    site = web.TCPSite(runner, '127.0.0.1', 8080)  # Bind to port 8080 or the port your hosting provider supports
     await site.start()
 
     try:
         await asyncio.Event().wait()  # Keep the service running
     except (KeyboardInterrupt, SystemExit):
-        await logger.warning('Bot stopped!')
+        logger.warning('Bot stopped!')
     except Exception as e:
-        await logger.error(f'Unexpected error: {e}', exc_info=True)
+        logger.error(f'Unexpected error: {e}', exc_info=True)
     finally:
+        logger.info("Cleaning up...")
         await bot.session.close()
         await engine.dispose()
         await runner.cleanup()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    if len(sys.argv) != 2:
+        print("Usage: python3 main.py <url>")
+        sys.exit(1)
+
+    url = sys.argv[1]
+    asyncio.run(main(url))
