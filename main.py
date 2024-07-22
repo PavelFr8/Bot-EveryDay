@@ -30,7 +30,7 @@ async def main(url: str):
     logger.info("Starting bot...")
 
     # Creating DB engine for PostgreSQL
-    engine = create_async_engine(config.mysql_url.get_secret_value(), echo=True)
+    engine = create_async_engine(config.postgresql_url.get_secret_value(), echo=True)
     db_pool = sessionmaker(engine, future=True, expire_on_commit=False, class_=AsyncSession)
 
     # Creating bot and its dispatcher
