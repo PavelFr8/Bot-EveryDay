@@ -14,6 +14,7 @@ Bot Helper - Telegram Bot, which gets you the opportunity create plans for a day
 
 ## How to start bot
 Write your bot token to **.env**
+
 Write your database url to **.env**
 
 ```ubuntu
