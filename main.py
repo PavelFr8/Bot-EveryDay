@@ -23,6 +23,7 @@ from bot.middlewares.middleware_db import DbSessionMiddleware
 from bot.middlewares.middleware_scheduler import SchedulerMiddleware
 from bot.middlewares.middleware_bot import BotMiddleware
 from bot.filters.chat_type import ChatTypeFilter
+from bot.db.create_tables import create_tables
 from bot import logger
 
 
@@ -95,8 +96,10 @@ async def main(url: str):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python3 main.py <url>")
+        print("Usage: \npython3 main.py <url> - run bot\npython3 main.py create_tables - create tables in db")
         sys.exit(1)
-
-    url = sys.argv[1]
-    asyncio.run(main(url))
+    if sys.argv[1] == 'create_tables':
+        asyncio.run(create_tables())
+    else:
+        url = sys.argv[1]
+        asyncio.run(main(url))

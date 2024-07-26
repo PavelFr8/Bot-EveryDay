@@ -1,7 +1,7 @@
 # Bot Helper
 <a href="https://t.me/DailyHelper8_bot"><img src="https://img.shields.io/badge/Telegram-🐸%20@DailyHelper8_bot-blue"></a>  
 
-Bot Helper - Telegram Bot, which gets you the opportunity create plans for a day, notifications and download video.
+Bot Helper - Telegram bot, which gets you the opportunity create plans for a day, notifications and download video.
 
 ![screenshot](img.png)
 
@@ -13,12 +13,17 @@ Bot Helper - Telegram Bot, which gets you the opportunity create plans for a day
 * [Cobalt API](https://github.com/cobalthq/cobalt-api-docs) (downloading video) 
 
 ## How to start bot
-Write your bot token to **.env**
 
-Write your database url to **.env**
+Write your **Telegram bot token** and **database url** to **.env**
 
 ```ubuntu
 pip install -r requirements.txt
+```
+
+Create tables in database
+
+```ubuntu
+python3 main.py create_tables
 ```
 
 Run ngrok server
