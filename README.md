@@ -1,5 +1,5 @@
 # Bot Helper
-<a href="https://t.me/DailyHelper8_bot"><img src="https://img.shields.io/badge/Telegram-🐸%20@DailyHelper8_bot-blue"></a>  
+<a href="https://t.me/DailyHelper8_bot"><img src="https://img.shields.io/badge/Telegram_bot-🐸%20@DailyHelper8-blue"></a>  
 
 Bot Helper - Telegram bot, which gets you the opportunity create plans for a day, notifications and download video.
 
