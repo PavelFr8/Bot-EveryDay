@@ -14,6 +14,10 @@ Bot Helper - Telegram bot, which gets you the opportunity create plans for a day
 
 ## How to start bot
 
+```ubuntu
+git clone https://github.com/PavelFr8/Bot-EveryDay
+```
+
 Write your **Telegram bot token** and **database url** to **.env**
 
 ```ubuntu
