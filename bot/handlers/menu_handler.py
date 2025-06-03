@@ -19,7 +19,7 @@ main_menu_router = Router()
 )
 async def start(
         message: Message,
-        session: AsyncSession):
+        session: AsyncSession) -> None:
     welcome_text = (
         "Приветствую тебя, путник в мире бесконечных напоминаний и задач\\! 🌟\n\n"
         "Я *Твой Личный Ассистент Бот*, и я здесь, чтобы помочь тебе не забыть о важных вещах в этой суете жизни\\.\n\n"
@@ -42,7 +42,7 @@ async def start(
 @main_menu_router.message(
     Command("menu"),
     ChatTypeFilter(chat_type="private"))
-async def main_menu(message: Message, state: FSMContext):
+async def main_menu(message: Message, state: FSMContext) -> None:
     menu_text = (
         "👋  Привет\\! Ты снова в главном меню\\! 🎉\n\n"
         "Выбирай, что тебе по душе:\n"
@@ -62,7 +62,7 @@ async def main_menu(message: Message, state: FSMContext):
 
 # Обработчик возвращения в главное меню
 @main_menu_router.callback_query(F.data == 'back')
-async def menu(callback: CallbackQuery, state: FSMContext):
+async def menu(callback: CallbackQuery, state: FSMContext) -> None:
     menu_text = (
         "👋  Привет\\! Ты снова в главном меню\\! 🎉\n\n"
         "Выбирай, что тебе по душе:\n"
