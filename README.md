@@ -21,7 +21,7 @@ git clone https://github.com/PavelFr8/Bot-EveryDay
 Write your **Telegram bot token** and **database url** to **.env**
 
 ```ubuntu
-pip install -r requirements.txt
+pip install -r requirements/dev.txt
 ```
 
 Create tables in database
