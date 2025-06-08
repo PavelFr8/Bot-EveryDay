@@ -1,13 +1,13 @@
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
-
+from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.keyboards.menu_kb import get_menu_kb
+from bot.db.crud import save_data
 from bot.filters.chat_type import ChatTypeFilter
-from bot.db.reqsts import save_data
+from bot.keyboards.menu_kb import get_menu_kb
+from bot.utils.load_text import load_text
 
 main_menu_router = Router()
 
@@ -15,33 +15,19 @@ main_menu_router = Router()
 # Обработчик команды /start
 @main_menu_router.message(
     Command("start"),
-    ChatTypeFilter(chat_type="private")
+    ChatTypeFilter(chat_type="private"),
 )
-async def start(
-        message: Message,
-        session: AsyncSession) -> None:
-    welcome_text = (
-        "Приветствую тебя, путник в мире бесконечных напоминаний и задач\\! 🌟\n\n"
-        "Я *Твой Личный Ассистент Бот*, и я здесь, чтобы помочь тебе не забыть о важных вещах в этой суете жизни\\.\n\n"
-        "Вот что я могу для тебя сделать:\n"
-        "— Создавать *напоминания* в удобное для тебя время\n"
-        "— Помогать *скачивать видео* для оффлайн просмотра\n"
-        "— Составлять *план на день*, чтобы ты был в курсе своих дел\n"
-        "— И многое другое, что упростит твою повседневную жизнь\n\n"
-        "Давай начнем\\. Ниже находится главное меню, где можно выбрать нужную функцию\\."
-    )
+async def start(message: Message, session: AsyncSession) -> None:
+    wellcome_text = load_text("wellcome.html")
     await message.answer(
-        welcome_text,
-        parse_mode="MarkdownV2",
-        reply_markup=get_menu_kb()
+        wellcome_text,
+        parse_mode="HTML",
+        reply_markup=get_menu_kb(),
     )
     await save_data(session, message.from_user.id)
 
 
-# Обработчик команды /menu
-@main_menu_router.message(
-    Command("menu"),
-    ChatTypeFilter(chat_type="private"))
+@main_menu_router.message(Command("menu"), ChatTypeFilter(chat_type="private"))
 async def main_menu(message: Message, state: FSMContext) -> None:
     menu_text = (
         "👋  Привет\\! Ты снова в главном меню\\! 🎉\n\n"
@@ -56,12 +42,12 @@ async def main_menu(message: Message, state: FSMContext) -> None:
     await message.answer(
         menu_text,
         parse_mode="MarkdownV2",
-        reply_markup=get_menu_kb()
+        reply_markup=get_menu_kb(),
     )
 
 
 # Обработчик возвращения в главное меню
-@main_menu_router.callback_query(F.data == 'back')
+@main_menu_router.callback_query(F.data == "back")
 async def menu(callback: CallbackQuery, state: FSMContext) -> None:
     menu_text = (
         "👋  Привет\\! Ты снова в главном меню\\! 🎉\n\n"
@@ -76,6 +62,6 @@ async def menu(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.edit_text(
         menu_text,
         parse_mode="MarkdownV2",
-        reply_markup=get_menu_kb()
+        reply_markup=get_menu_kb(),
     )
     await callback.answer()

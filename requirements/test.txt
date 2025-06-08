@@ -1,5 +1,4 @@
 -r prod.txt
-django-debug-toolbar==5.0.1
 flake8==7.1.1
 flake8-absolute-import==1.0.0.2
 flake8-broken-line==1.0.0
@@ -24,6 +23,4 @@ Flake8-pyproject==1.2.3
 flake8-return==1.2.0
 flake8-type-ignore==0.1.0.post2
 flake8-use-pathlib==0.3.0
-freezegun==1.5.1
-parameterized==0.9.0
 pep8-naming==0.14.1

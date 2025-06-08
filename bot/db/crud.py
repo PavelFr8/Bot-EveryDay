@@ -1,10 +1,9 @@
-from typing import Dict
-
-from bot import logger
+from typing import Dict, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bot import logger
 from bot.db.models import UserData
 
 
@@ -17,7 +16,7 @@ async def get_data_by_id(session: AsyncSession, user_id: int) -> UserData:
     :return: UserData object (can be empty)
     """
     data_request = await session.execute(
-        select(UserData).where(UserData.user_id == str(user_id))
+        select(UserData).where(UserData.user_id == str(user_id)),
     )
     data: UserData = data_request.scalars().first()
     data.user_id = int(data.user_id)
@@ -33,29 +32,35 @@ async def save_data(session: AsyncSession, user_id: int, data: Dict = None):
     :param user_id: User's Telegram ID
     """
     user = await session.execute(
-        select(UserData).where(UserData.user_id == str(user_id))
+        select(UserData).where(UserData.user_id == str(user_id)),
     )
     user: UserData = user.scalars().first()
     if bool(user):
-        logger.info(f'Update user {user_id}')
+        logger.info(f"Update user {user_id}")
         if data:
-            if data["deals"] != '':
-                if user.deals_list == '':
-                    user.deals_list = '0' + data["deals"]
+            if data["deals"] != "":
+                if user.deals_list == "":
+                    user.deals_list = "0" + data["deals"]
                 else:
-                    user.deals_list = user.deals_list + "),(" + '0' + data["deals"]
-            if data['notifications'] != '':
-                if user.notification_list == '':
+                    user.deals_list = (
+                        user.deals_list + "),(" + "0" + data["deals"]
+                    )
+
+            if data["notifications"] != "":
+                if user.notification_list == "":
                     user.notification_list = data["notifications"]
                 else:
-                    user.notification_list = user.notification_list + "),(" + data['notifications']
+                    user.notification_list = (
+                        user.notification_list + "),(" + data["notifications"]
+                    )
     else:
-        logger.info(f'New user {user_id}')
+        logger.info(f"New user {user_id}")
         entry = UserData()
         entry.user_id = str(user_id)
-        entry.deals_list = ''
-        entry.notification_list = ''
+        entry.deals_list = ""
+        entry.notification_list = ""
         session.add(entry)
+
     try:
         await session.commit()
     except Exception as e:
@@ -69,7 +74,17 @@ async def get_users(session: AsyncSession):
     :param session: SQLAlchemy DB session
     """
     users = await session.execute(
-        select(UserData).filter(UserData.deals_list != None)
+        select(UserData).filter(UserData.deals_list != None),
     )
-    users = users.scalars().all()
-    return users
+
+    return users.scalars().all()
+
+
+"""
+async def get_user(user_id: int) -> Optional[UserData]:
+    async with async_session() as session:
+        result = await session.execute(
+            select(UserData).where(UserData.user_id == user_id)
+        )
+        return result.scalar_one_or_none()
+"""

@@ -1,10 +1,10 @@
-from sqlalchemy import Column, String, Text, Integer, Boolean
+from sqlalchemy import Boolean, Column, Integer, String, Text
 
 from bot.db.base import Base
 
 
 class UserData(Base):
-    __tablename__ = "user_data"
+    __tablename__ = "users"
 
     user_id = Column(String(255), primary_key=True)
     deals_list = Column(String(1000), nullable=True)
