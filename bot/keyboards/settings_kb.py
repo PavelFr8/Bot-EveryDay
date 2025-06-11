@@ -5,7 +5,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 def get_settings_kb(state) -> types.InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="🕑  Изменить часовой пояс", callback_data="change_timezone"
+        text="🕑  Изменить часовой пояс",
+        callback_data="change_timezone",
     )
     if state:
         builder.button(
@@ -17,6 +18,7 @@ def get_settings_kb(state) -> types.InlineKeyboardMarkup:
             text="Уведомления о плане на день: ❌",
             callback_data="change_notf_state",
         )
+
     builder.button(text="⬅️  Назад", callback_data="back")
     builder.adjust(1)
     return builder.as_markup()

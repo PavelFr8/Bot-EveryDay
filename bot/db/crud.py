@@ -102,14 +102,10 @@ async def change_notify_state(user_id: int) -> None:
                 logger.info(
                     f"User {user_id} notify_state upd to {user.notify_state}",
                 )
-                await session.refresh(user)
-                logger.info(
-                    f"After refresh: notify_state = {user.notify_state}"
-                )
             else:
                 logger.warning(f"User {user_id} not found for notif_state upd")
     except SQLAlchemyError as e:
-        logger.error(f"Error changing notification state for user {user_id}: {e}")
+        logger.error(f"Error changing notify state for user {user_id}: {e}")
 
 
 async def save_data(user_id: int, data: dict[str, str] = None):

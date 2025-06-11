@@ -15,7 +15,8 @@ def get_plan_kb() -> types.InlineKeyboardMarkup:
     builder.button(text="❌  Удалить", callback_data="del_deal")
     builder.button(text="⬅️  Назад", callback_data="back")
     builder.button(
-        text="🔄  Изменить состояние задачи", callback_data="change_deal"
+        text="🔄  Изменить состояние задачи",
+        callback_data="change_deal",
     )
     builder.adjust(3)
     return builder.as_markup()

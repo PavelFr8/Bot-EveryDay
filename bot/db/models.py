@@ -7,7 +7,12 @@ from bot.db.base import Base
 class Users(Base):
     __tablename__ = "users"
 
-    telegram_id: Mapped[int] = mapped_column(Integer(), index=True, unique=True, nullable=False,)
+    telegram_id: Mapped[int] = mapped_column(
+        Integer(),
+        index=True,
+        unique=True,
+        nullable=False,
+    )
     timezone: Mapped[int] = mapped_column(Integer(), default=3)
     notify_state: Mapped[bool] = mapped_column(Boolean(), default=True)
     notifications: Mapped[list["Notifications"]] = relationship(

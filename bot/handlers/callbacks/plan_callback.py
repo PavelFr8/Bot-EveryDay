@@ -43,9 +43,9 @@ def create_beautiful_plan(data: str):
     back_text = ""
     for elem in text:
         if bool(int(elem[0])):
-            back_text += "✅   " + f"<s>{elem[1:]}</s>" + "\n"
+            back_text += f"✅   <s>{elem[1:]}</s>\n"
         else:
-            back_text += "<b>•</b>  " + elem[1:] + "\n"
+            back_text += f"<b>•</b>  {elem[1:]}\n"
 
     return back_text
 
@@ -58,7 +58,7 @@ def create_plan_for_schedules(data: str):
         if bool(int(elem[0])):
             back_text += ""
         else:
-            back_text += "<b>•</b>  " + elem[1:] + "\n"
+            back_text += f"<b>•</b>  {elem[1:]}\n"
 
     return back_text
 
@@ -70,9 +70,9 @@ def create_enum_plan(data: str):
     i = 1
     for elem in text:
         if bool(int(elem[0])):
-            back_text += "✅   " + elem[1:] + f" - <b>{i}</b>" + "\n"
+            back_text += f"✅   {elem[1:]} - <b>{i}</b>\n"
         else:
-            back_text += "<b>•</b>  " + elem[1:] + f" - <b>{i}</b>" + "\n"
+            back_text += f"<b>•</b>  {elem[1:]} - <b>{i}</b>\n"
 
         i += 1
 
@@ -85,10 +85,8 @@ def create_enum_plan(data: str):
 @plan_callback_router.callback_query(
     MenuCallbackFactory.filter(F.action == "plan"),
 )
-async def callbacks_plan(
-    callback: types.CallbackQuery, session: AsyncSession, state: FSMContext
-):
-    data = await get_user_by_id(session, callback.from_user.id)
+async def callbacks_plan(callback: types.CallbackQuery, state: FSMContext):
+    data = await get_user_by_id(callback.from_user.id)
     if data.deals_list:
         deals_list = create_beautiful_plan(data.deals_list)
         await callback.message.edit_text(
@@ -139,13 +137,11 @@ async def add_more_deals(callback: types.CallbackQuery, state: FSMContext):
 
 # Обработчик для добавления новой задачи
 @plan_callback_router.message(GetPlan.getting_plan)
-async def add_deal(
-    message: types.Message, state: FSMContext, session: AsyncSession
-):
+async def add_deal(message: types.Message, state: FSMContext):
     fsm_data = await state.get_data()
     fsm_data["deals"] = message.text
     fsm_data["notifications"] = ""
-    await save_data(session, message.from_user.id, fsm_data)
+    await save_data(message.from_user.id, fsm_data)
     await message.answer(
         "*Отлично\\!* \nЯ добавил задачу в план на день\\! ⚡️",
         parse_mode="MarkdownV2",
@@ -156,10 +152,8 @@ async def add_deal(
 
 # Колбэк на удаление задачи
 @plan_callback_router.callback_query(F.data == "del_deal")
-async def del_deal(
-    callback: types.CallbackQuery, state: FSMContext, session: AsyncSession
-):
-    data = await get_user_by_id(session, callback.from_user.id)
+async def del_deal(callback: types.CallbackQuery, state: FSMContext):
+    data = await get_user_by_id(callback.from_user.id)
     enum_deals_list = create_enum_plan(data.deals_list)
     await callback.message.edit_text(
         "<b>Задач бывает и много!</b> ⚡️\n\n"
@@ -174,10 +168,8 @@ async def del_deal(
 
 # Обработчик для удаления задачи
 @plan_callback_router.message(GetDel.choosing_wrong)
-async def get_del_deal(
-    message: types.Message, state: FSMContext, session: AsyncSession
-):
-    data = await get_user_by_id(session, message.from_user.id)
+async def get_del_deal(message: types.Message, state: FSMContext):
+    data = await get_user_by_id(message.from_user.id)
     data.user_id = str(data.user_id)
     data.deals_list = data.deals_list.split("),(")
     del data.deals_list[int(message.text) - 1]
@@ -193,10 +185,8 @@ async def get_del_deal(
 
 # Колбэк на изменение состояния задачи
 @plan_callback_router.callback_query(F.data == "change_deal")
-async def change_deal(
-    callback: types.CallbackQuery, state: FSMContext, session: AsyncSession
-):
-    data = await get_user_by_id(session, callback.from_user.id)
+async def change_deal(callback: types.CallbackQuery, state: FSMContext):
+    data = await get_user_by_id(callback.from_user.id)
     enum_deals_list = create_enum_plan(data.deals_list)
     await callback.message.edit_text(
         "<b>Продуктивность - ключ к успеху!</b> ⚡️\n\n"
@@ -211,10 +201,8 @@ async def change_deal(
 
 # Обработчик для изменения состояния задачи
 @plan_callback_router.message(GetChanged.choosing_changed)
-async def get_change_deal(
-    message: types.Message, state: FSMContext, session: AsyncSession
-):
-    data: Users = await get_user_by_id(session, message.from_user.id)
+async def get_change_deal(message: types.Message, state: FSMContext):
+    data: Users = await get_user_by_id(message.from_user.id)
     data.user_id = str(data.user_id)
     data.deals_list = [
         (item[0], item[1:])
@@ -228,7 +216,7 @@ async def get_change_deal(
         f"{state}{desc}" for state, desc in data.deals_list
     )
     await session.commit()
-    data = await get_user_by_id(session, message.from_user.id)
+    data = await get_user_by_id(message.from_user.id)
     deals_list = create_beautiful_plan(data.deals_list)
     await message.answer(
         "<b>Продуктивность - ключ к успеху!</b> ⚡️\n\n"
@@ -282,12 +270,8 @@ async def send_message(bot, session, chat_id):
 
 # Колбэк на добавление старых задач в новый список
 @plan_callback_router.callback_query(F.data == "add_plan_schedule")
-async def add_old_plan(
-    callback: types.CallbackQuery,
-    session: AsyncSession,
-    state: FSMContext,
-):
-    data = await get_user_by_id(session, callback.from_user.id)
+async def add_old_plan(callback: types.CallbackQuery, state: FSMContext):
+    data = await get_user_by_id(callback.from_user.id)
     data.user_id = str(data.user_id)
     text = data.deals_list.split("),(")
     back_text = ""
@@ -306,12 +290,8 @@ async def add_old_plan(
 
 # Колбэк на отказ от добавления старых задач в новый список
 @plan_callback_router.callback_query(F.data == "del_plan_schedule")
-async def add_old_plan(
-    callback: types.CallbackQuery,
-    session: AsyncSession,
-    state: FSMContext,
-):
-    data = await get_user_by_id(session, callback.from_user.id)
+async def del_old_plan(callback: types.CallbackQuery, state: FSMContext):
+    data = await get_user_by_id(callback.from_user.id)
     data.user_id = str(data.user_id)
     data.deals_list = ""
     await session.commit()

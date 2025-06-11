@@ -20,7 +20,9 @@ async def get_video(video_url: str):
             "Content-Type": "application/json",
         }
         async with sess.post(
-            url, json=request_body, headers=headers
+            url,
+            json=request_body,
+            headers=headers,
         ) as response:
             try:
                 data = await response.json()
@@ -29,7 +31,3 @@ async def get_video(video_url: str):
             except Exception as e:
                 logger.info(f"Error in request: {e}")
                 raise e
-
-
-if __name__ == "__main__":
-    print(get_video("https://www.youtube.com/watch?v=l4QHVsStASU"))
