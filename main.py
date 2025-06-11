@@ -4,8 +4,8 @@ import sys
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.webhook.aiohttp_server import (
-    setup_application,
     SimpleRequestHandler,
+    setup_application,
 )
 from aiohttp import web
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -29,6 +29,7 @@ from bot.middlewares.middleware_db import DbSessionMiddleware
 from bot.middlewares.middleware_scheduler import SchedulerMiddleware
 
 # TODO: new db struct, refactor main.py
+
 
 async def main(url: str):
     logger.info("Starting bot...")

@@ -7,8 +7,8 @@ from pytz import utc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.cbdata import MenuCallbackFactory
-from bot.db.crud import get_data_by_id, get_users, save_data
-from bot.db.models import UserData
+from bot.db.crud import get_user_by_id, get_users, save_data
+from bot.db.models import Users
 from bot.handlers.menu_handler import menu
 from bot.keyboards.plan_kbs import (
     get_back_kb,
@@ -88,7 +88,7 @@ def create_enum_plan(data: str):
 async def callbacks_plan(
     callback: types.CallbackQuery, session: AsyncSession, state: FSMContext
 ):
-    data = await get_data_by_id(session, callback.from_user.id)
+    data = await get_user_by_id(session, callback.from_user.id)
     if data.deals_list:
         deals_list = create_beautiful_plan(data.deals_list)
         await callback.message.edit_text(
@@ -159,7 +159,7 @@ async def add_deal(
 async def del_deal(
     callback: types.CallbackQuery, state: FSMContext, session: AsyncSession
 ):
-    data = await get_data_by_id(session, callback.from_user.id)
+    data = await get_user_by_id(session, callback.from_user.id)
     enum_deals_list = create_enum_plan(data.deals_list)
     await callback.message.edit_text(
         "<b>Задач бывает и много!</b> ⚡️\n\n"
@@ -177,7 +177,7 @@ async def del_deal(
 async def get_del_deal(
     message: types.Message, state: FSMContext, session: AsyncSession
 ):
-    data = await get_data_by_id(session, message.from_user.id)
+    data = await get_user_by_id(session, message.from_user.id)
     data.user_id = str(data.user_id)
     data.deals_list = data.deals_list.split("),(")
     del data.deals_list[int(message.text) - 1]
@@ -196,7 +196,7 @@ async def get_del_deal(
 async def change_deal(
     callback: types.CallbackQuery, state: FSMContext, session: AsyncSession
 ):
-    data = await get_data_by_id(session, callback.from_user.id)
+    data = await get_user_by_id(session, callback.from_user.id)
     enum_deals_list = create_enum_plan(data.deals_list)
     await callback.message.edit_text(
         "<b>Продуктивность - ключ к успеху!</b> ⚡️\n\n"
@@ -214,7 +214,7 @@ async def change_deal(
 async def get_change_deal(
     message: types.Message, state: FSMContext, session: AsyncSession
 ):
-    data: UserData = await get_data_by_id(session, message.from_user.id)
+    data: Users = await get_user_by_id(session, message.from_user.id)
     data.user_id = str(data.user_id)
     data.deals_list = [
         (item[0], item[1:])
@@ -228,7 +228,7 @@ async def get_change_deal(
         f"{state}{desc}" for state, desc in data.deals_list
     )
     await session.commit()
-    data = await get_data_by_id(session, message.from_user.id)
+    data = await get_user_by_id(session, message.from_user.id)
     deals_list = create_beautiful_plan(data.deals_list)
     await message.answer(
         "<b>Продуктивность - ключ к успеху!</b> ⚡️\n\n"
@@ -267,7 +267,7 @@ async def scheduled_task(session_factory, bot, scheduler):
 
 # Ежедневная функция оповещения о невыполненных задачах
 async def send_message(bot, session, chat_id):
-    data = await get_data_by_id(session, chat_id)
+    data = await get_user_by_id(session, chat_id)
     deals_list = create_plan_for_schedules(data.deals_list)
     await bot.send_message(
         chat_id,
@@ -287,7 +287,7 @@ async def add_old_plan(
     session: AsyncSession,
     state: FSMContext,
 ):
-    data = await get_data_by_id(session, callback.from_user.id)
+    data = await get_user_by_id(session, callback.from_user.id)
     data.user_id = str(data.user_id)
     text = data.deals_list.split("),(")
     back_text = ""
@@ -311,7 +311,7 @@ async def add_old_plan(
     session: AsyncSession,
     state: FSMContext,
 ):
-    data = await get_data_by_id(session, callback.from_user.id)
+    data = await get_user_by_id(session, callback.from_user.id)
     data.user_id = str(data.user_id)
     data.deals_list = ""
     await session.commit()

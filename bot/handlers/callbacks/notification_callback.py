@@ -8,7 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.cbdata import MenuCallbackFactory
-from bot.db.crud import get_data_by_id, save_data
+from bot.db.crud import get_user_by_id, save_data
 from bot.keyboards.notification_kb import (
     get_back_kb,
     get_default_notification_kb,
@@ -39,7 +39,7 @@ async def new_notification(data: Dict, bot: Bot, session: AsyncSession):
     )
 
     # удаление напоминания из БД
-    tmp_data = await get_data_by_id(session, message.from_user.id)
+    tmp_data = await get_user_by_id(session, message.from_user.id)
     tmp_data.user_id = str(tmp_data.user_id)
 
     tmp_data.notification_list = tmp_data.notification_list.replace(
@@ -86,7 +86,7 @@ def create_beautiful_notifications(notf_list):
 async def callback_reminder(
     callback: types.CallbackQuery, state: FSMContext, session: AsyncSession
 ):
-    data = await get_data_by_id(session, callback.from_user.id)
+    data = await get_user_by_id(session, callback.from_user.id)
     if data.notification_list:
         data_list = create_beautiful_notifications(data.notification_list)
         await callback.message.edit_text(
