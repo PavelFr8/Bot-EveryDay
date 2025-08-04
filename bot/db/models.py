@@ -26,6 +26,43 @@ class Users(Base):
         lazy="joined",
     )
 
+    # Функция для создания красивого списка задач
+    async def get_beautiful_plan(self) -> str:
+        anw = ""
+        for deal in self.deals:
+            if deal.is_done:
+                anw += "✅ "
+            else:
+                anw += "<b>•</b> "
+
+            anw += f"{deal.text}\n"
+
+        return anw
+
+    # Функция для создания красивого пронумерованного списка задач
+    async def get_enum_plan(self) -> str:
+        anw = ""
+        for deal in self.deals:
+            if deal.is_done:
+                anw += "✅ "
+            else:
+                anw += "<b>•</b> "
+
+            anw += f"{deal.text} - {deal.id}\n"
+
+        return anw
+
+    # Функция для создания красивого списка НЕ ВЫПОЛНЕННЫХ задач
+    async def get_plan_for_schedules(self) -> str:
+        anw = ""
+        for deal in self.deals:
+            if not deal.is_done:
+                anw += "<b>•</b> "
+
+            anw += f"{deal.text}\n"
+
+        return anw
+
 
 class Notifications(Base):
     __tablename__ = "notifications"
@@ -40,6 +77,6 @@ class Deals(Base):
     __tablename__ = "deals"
 
     text: Mapped[str] = mapped_column(Text, nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
+    is_done: Mapped[bool] = mapped_column(Boolean(), default=False)
     user: Mapped["Users"] = relationship(back_populates="deals")
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

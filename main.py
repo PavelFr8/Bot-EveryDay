@@ -28,7 +28,7 @@ from bot.middlewares.middleware_bot import BotMiddleware
 from bot.middlewares.middleware_db import DbSessionMiddleware
 from bot.middlewares.middleware_scheduler import SchedulerMiddleware
 
-# TODO: new db struct, refactor main.py
+# TODO: refactor main.py
 
 
 async def main(url: str):

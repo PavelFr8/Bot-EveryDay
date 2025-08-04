@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot import logger
 from bot.db.engine import async_session
-from bot.db.models import Users
+from bot.db.models import Deals, Users
 
 
 async def get_users() -> list[Users]:
@@ -108,6 +108,67 @@ async def change_notify_state(user_id: int) -> None:
         logger.error(f"Error changing notify state for user {user_id}: {e}")
 
 
+async def create_deal(user_id: int, text: str) -> None:
+    """
+    Create a new deal for the user
+
+    :param user_id: User's Telegram ID
+    :param text: Deal text
+    """
+    try:
+        async with async_session() as session:
+            user = await get_user_by_id(user_id, session=session)
+            if user:
+                deal = Deals(text=text, user=user)
+                session.add(deal)
+                await session.commit()
+                logger.info(f"Deal {deal.id} created")
+            else:
+                logger.warning(f"User {user_id} not found for deal creation")
+    except SQLAlchemyError as e:
+        logger.error(f"Error creating deal for user {user_id}: {e}")
+
+
+async def delete_deal(user_id: int, deal_id: int) -> None:
+    """
+    Delete a deal by its ID
+
+    :param deal_id: ID of the deal to delete
+    """
+    try:
+        async with async_session() as session:
+            user = await get_user_by_id(user_id, session=session)
+            deal = await session.get(Deals, deal_id)
+            if deal in user.deals:
+                await session.delete(deal)
+                await session.commit()
+                logger.info(f"Deal {deal_id} deleted")
+            else:
+                logger.warning(f"Deal {deal_id} not found")
+    except SQLAlchemyError as e:
+        logger.error(f"Error deleting deal {deal_id}: {e}")
+
+
+async def change_deal_state(user_id: int, deal_id: int) -> None:
+    """
+    Change the state of a deal by its ID
+
+    :param deal_id: ID of the deal to change state
+    """
+    try:
+        async with async_session() as session:
+            user = await get_user_by_id(user_id, session=session)
+            deal = await session.get(Deals, deal_id)
+            if deal in user.deals:
+                deal.is_done = not deal.is_done
+                await session.commit()
+                logger.info(f"Deal {deal_id} state changed to {deal.is_done}")
+            else:
+                logger.warning(f"Deal {deal_id} not found")
+    except SQLAlchemyError as e:
+        logger.error(f"Error changing state for deal {deal_id}: {e}")
+
+
 async def save_data(user_id: int, data: dict[str, str] = None):
     """
     Send updated data to db
@@ -122,7 +183,7 @@ async def save_data(user_id: int, data: dict[str, str] = None):
     if user:
         if data:
             logger.info(f"Updating user {user_id}")
-            if data["deals"] != "":
+            if data["deal"] != "":
                 if user.deals_list == "":
                     user.deals_list = "0" + data["deals"]
                 else:
