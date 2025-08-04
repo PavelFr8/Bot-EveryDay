@@ -9,6 +9,7 @@ from bot import logger
 from bot.api.get_video import get_video
 from bot.cbdata import MenuCallbackFactory
 from bot.keyboards.download_kb import get_back_kb, get_download_kb
+from bot.utils.load_text import load_text
 
 download_callback_router = Router()
 
@@ -20,18 +21,16 @@ class GetUrl(StatesGroup):
 
 # Колбэк для скачивания видео
 @download_callback_router.callback_query(
-    StateFilter(None), MenuCallbackFactory.filter(F.action == "download")
+    StateFilter(None),
+    MenuCallbackFactory.filter(F.action == "download"),
 )
 async def callbacks_download(
     callback: types.CallbackQuery,
-    callback_data: MenuCallbackFactory,
     state: FSMContext,
 ):
     await callback.message.edit_text(
-        "📥 Хотите скачать видео\\? Отлично\\! \n\n"
-        "Пожалуйста, отправьте мне *ссылку* на видео, "
-        "и я начну процесс загрузки для вас\\. После загрузки, вы сможете его скачать\\!\n\n",
-        parse_mode="MarkdownV2",
+        load_text("downloads/download.html"),
+        parse_mode="HTML",
         reply_markup=get_back_kb(),
     )
     await callback.answer()
@@ -41,42 +40,24 @@ async def callbacks_download(
 # Обработчик для отправки скачанного видео
 @download_callback_router.message(GetUrl.getting_url)
 async def video(message: types.Message, state: FSMContext):
-    # Проверяем, является ли текст сообщения URL
     if re.match(r"\bhttps?://\S+\.\S+\b", message.text):
         try:
             await state.update_data(url=message.text)
             user_data = await state.get_data()
-            video_url = get_video(user_data["url"])
-            # logging.info(f'{user_data["url"]}')
+            video_url = await get_video(user_data["url"])
             await message.answer(
-                text="Видео успешно скачано! ✨",
-                reply_markup=get_download_kb(video_url),
+                text=load_text("downloads/success.html"),
+                reply_markup=get_download_kb(video_url["url"]),
             )
             await state.clear()
         except Exception as e:
             await message.answer(
-                text="Ой, кажется, я не могу скачать это видео...",
+                text=load_text("downloads/wrong_url.html"),
                 reply_markup=get_back_kb(),
             )
             logger.error(f"Bot fail downloading video: {e}")
     else:
         await message.answer(
-            text="Кажется, вы прислали не ссылку.", reply_markup=get_back_kb()
+            text=load_text("downloads/error.html"),
+            reply_markup=get_back_kb(),
         )
-
-
-@download_callback_router.callback_query(
-    StateFilter(None), F.data == "download_more"
-)
-async def callbacks_more_video(
-    callback: types.CallbackQuery, state: FSMContext
-):
-    await callback.message.edit_text(
-        "📥 Видео много не бывает\\! \n\n"
-        "Пожалуйста, отправьте мне *ссылку* на видео, "
-        "и я начну процесс загрузки для вас\\. После загрузки, вы сможете его скачать\\!\n\n",
-        parse_mode="MarkdownV2",
-        reply_markup=get_back_kb(),
-    )
-    await state.set_state(GetUrl.getting_url)
-    await callback.answer()

@@ -1,18 +1,16 @@
 from aiohttp import ClientSession
 
 from bot import logger
+from bot.config_reader import config
 
 
 # Функция для запросов к Cobalt api
 async def get_video(video_url: str):
     async with ClientSession() as sess:
-        url = "https://api.cobalt.tools/api/json"
-
         request_body = {
             "url": video_url,
-            "vCodec": "h264",
-            "vQuality": "720",
-            "aFormat": "mp3",
+            "videoQuality": "720",
+            "audioFormat": "mp3",
         }
 
         headers = {
@@ -20,14 +18,13 @@ async def get_video(video_url: str):
             "Content-Type": "application/json",
         }
         async with sess.post(
-            url,
+            config.api_url.get_secret_value(),
             json=request_body,
             headers=headers,
         ) as response:
             try:
                 data = await response.json()
-                logger.info("User get video")
-                return data["url"]
+                return data
             except Exception as e:
-                logger.info(f"Error in request: {e}")
+                logger.error(f"Error in request: {e}")
                 raise e

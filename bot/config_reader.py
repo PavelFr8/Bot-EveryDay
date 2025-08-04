@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     postgres_port: SecretStr
     postgres_password: SecretStr
     postgres_host: SecretStr
+    api_url: SecretStr
 
     @property
     def postgresql_url(self) -> str:

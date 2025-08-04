@@ -39,3 +39,7 @@ Run bot
 ```ubuntu
 python3 main.py <ngrok_url>
 ```
+
+## Лицензия
+
+Этот проект использует Cobalt API, распространяемый под лицензией [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
