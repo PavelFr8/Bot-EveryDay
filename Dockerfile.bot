@@ -1,0 +1,8 @@
+FROM python:alpine
+
+WORKDIR /bot
+
+COPY . .
+RUN pip install --no-cache-dir -r requirements/prod.txt
+
+CMD ["sh", "-c", "alembic upgrade head && uvicorn run:app --host 0.0.0.0 --port 8000"]

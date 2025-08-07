@@ -139,3 +139,5 @@ cython_debug/
 # Cursor
 .cursorignore
 .cursorindexingignore
+
+logs

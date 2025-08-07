@@ -1,33 +1,30 @@
 from aiohttp import ClientSession
 
 from bot import logger
+from bot.config_reader import config
 
 
 # Функция для запросов к Cobalt api
 async def get_video(video_url: str):
     async with ClientSession() as sess:
-        url = "https://api.cobalt.tools/api/json"
-
         request_body = {
             "url": video_url,
-            "vCodec": "h264",
-            "vQuality": "720",
-            "aFormat": "mp3"
+            "videoQuality": "720",
+            "audioFormat": "mp3",
         }
 
         headers = {
             "Accept": "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
-        async with sess.post(url, json=request_body, headers=headers) as response:
+        async with sess.post(
+            f"{config.api_url.get_secret_value()}",
+            json=request_body,
+            headers=headers,
+        ) as response:
             try:
                 data = await response.json()
-                logger.info('User get video')
-                return data['url']
+                return data
             except Exception as e:
-                logger.info(f"Error in request: {e}")
+                await logger.error(f"Error in request: {e}")
                 raise e
-
-
-if __name__ == "__main__":
-    print(get_video("https://www.youtube.com/watch?v=l4QHVsStASU"))

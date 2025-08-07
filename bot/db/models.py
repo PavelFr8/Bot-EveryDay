@@ -1,13 +1,66 @@
-from sqlalchemy import Column, String, Text, Integer, Boolean
+from sqlalchemy import Boolean, ForeignKey, Integer, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from bot.db.base import Base
 
 
-class UserData(Base):
-    __tablename__ = "user_data"
+class Users(Base):
+    __tablename__ = "users"
 
-    user_id = Column(String(255), primary_key=True)
-    deals_list = Column(String(1000), nullable=True)
-    notification_list = Column(Text, nullable=True)
-    timezone = Column(Integer(), nullable=True, default=0)
-    notifications_state = Column(Boolean(), nullable=False, default=True)
+    telegram_id: Mapped[int] = mapped_column(
+        Integer(),
+        index=True,
+        unique=True,
+        nullable=False,
+    )
+    timezone: Mapped[int] = mapped_column(Integer(), default=3)
+    notify_state: Mapped[bool] = mapped_column(Boolean(), default=True)
+    deals: Mapped[list["Deals"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+
+    # Функция для создания красивого списка задач
+    async def get_beautiful_plan(self) -> str:
+        anw = ""
+        for deal in self.deals:
+            if deal.is_done:
+                anw += "✅ "
+            else:
+                anw += "<b>•</b> "
+
+            anw += f"{deal.text}\n"
+
+        return anw
+
+    # Функция для создания красивого пронумерованного списка задач
+    async def get_enum_plan(self) -> str:
+        anw = ""
+        for deal in self.deals:
+            if deal.is_done:
+                anw += "✅ "
+            else:
+                anw += "<b>•</b> "
+
+            anw += f"{deal.text} - {deal.id}\n"
+
+        return anw
+
+    # Функция для создания красивого списка НЕ ВЫПОЛНЕННЫХ задач
+    async def get_plan_for_schedules(self) -> str:
+        anw = ""
+        for deal in self.deals:
+            if not deal.is_done:
+                anw += f"<b>•</b> {deal.text}\n"
+
+        return anw
+
+
+class Deals(Base):
+    __tablename__ = "deals"
+
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    is_done: Mapped[bool] = mapped_column(Boolean(), default=False)
+    user: Mapped["Users"] = relationship(back_populates="deals")
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

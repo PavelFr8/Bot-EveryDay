@@ -1,18 +1,16 @@
 [tool.flake8]
-application-import-names = "widgets,utils"
+application-import-names = "api,db,filters,handlers,keyboards,middlewares,bot"
 import-order-style = "google"
-exclude = "venv, .venv, .env, .git, __pycache__"
+exclude = "venv, .venv, .env, .git, __pycache__, alembic"
 max-line-length = 79
 inline-quotes = "double"
 forbidden-imports = "inspect,sys"
-disable-noqa = true
 
 [tool.black]
 line-length = 79
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 79
 multi_line_output = 3
 include_trailing_comma = true
-known_first_party = ["myproject"]
