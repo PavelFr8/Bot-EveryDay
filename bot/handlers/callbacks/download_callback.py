@@ -24,6 +24,10 @@ class GetUrl(StatesGroup):
     StateFilter(None),
     MenuCallbackFactory.filter(F.action == "download"),
 )
+@download_callback_router.callback_query(
+    StateFilter(None),
+    F.data == "download",
+)
 async def callbacks_download(
     callback: types.CallbackQuery,
     state: FSMContext,
@@ -55,7 +59,7 @@ async def video(message: types.Message, state: FSMContext):
                 text=load_text("downloads/wrong_url.html"),
                 reply_markup=get_back_kb(),
             )
-            logger.error(f"Bot fail downloading video: {e}")
+            await logger.error(f"Bot fail downloading video: {e}")
     else:
         await message.answer(
             text=load_text("downloads/error.html"),

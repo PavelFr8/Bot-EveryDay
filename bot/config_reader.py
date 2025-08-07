@@ -9,17 +9,28 @@ class Settings(BaseSettings):
     )
 
     bot_token: SecretStr
+    host_url: SecretStr
+    api_url: SecretStr
     postgres_db: SecretStr
     postgres_user: SecretStr
     postgres_port: SecretStr
     postgres_password: SecretStr
     postgres_host: SecretStr
-    api_url: SecretStr
 
     @property
-    def postgresql_url(self) -> str:
+    def async_postgresql_url(self) -> str:
         return (
             f"postgresql+asyncpg://{self.postgres_user.get_secret_value()}:"
+            f"{self.postgres_password.get_secret_value()}@"
+            f"{self.postgres_host.get_secret_value()}:"
+            f"{self.postgres_port.get_secret_value()}/"
+            f"{self.postgres_db.get_secret_value()}"
+        )
+
+    @property
+    def sync_postgresql_url(self) -> str:
+        return (
+            f"postgresql://{self.postgres_user.get_secret_value()}:"
             f"{self.postgres_password.get_secret_value()}@"
             f"{self.postgres_host.get_secret_value()}:"
             f"{self.postgres_port.get_secret_value()}/"

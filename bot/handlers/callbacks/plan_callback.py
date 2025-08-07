@@ -1,18 +1,17 @@
-from datetime import datetime, timedelta
-
-from aiogram import F, Router, types
+from aiogram import Bot, F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from pytz import utc
 
 from bot.cbdata import MenuCallbackFactory
+from bot.config_reader import config
 from bot.db.crud import (
     change_deal_state,
     create_deal,
     delete_deal,
     get_user_by_id,
-    get_users,
+    get_users_batch_for_notify,
 )
+from bot.db.models import Users
 from bot.handlers.menu_handler import menu
 from bot.keyboards.plan_kbs import (
     get_back_kb,
@@ -158,50 +157,13 @@ async def get_change_deal(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-# Ежедневная функция оповещения о невыполненных задачах
-async def scheduled_task(session_factory, bot, scheduler):
-    async with session_factory() as session:
-        users = await get_users(session)
-        for user in users:
-            if user.deals_list and user.notifications_state:
-                run_time = datetime.now(utc) + timedelta(hours=user.timezone)
-                run_time = run_time.replace(
-                    hour=0,
-                    minute=0,
-                    second=0,
-                    microsecond=0,
-                )
-
-                if datetime.now(utc) > run_time:
-                    run_time += timedelta(days=1)
-
-                scheduler.add_job(
-                    send_message,
-                    "date",
-                    run_date=run_time,
-                    args=[bot, session, user.user_id],
-                )
-
-
-# Ежедневная функция оповещения о невыполненных задачах
-async def send_message(bot, session, chat_id):
-    user = await get_user_by_id(session, chat_id)
-    deals_list = await user.get_plan_for_schedules()
-    await bot.send_message(
-        chat_id,
-        load_text("plan/scheduled_plan.html").format(deals_list=deals_list),
-        parse_mode="HTML",
-        reply_markup=get_schedule_kb(),
-    )
-
-
 # Колбэк на добавление старых задач в новый список
 @plan_callback_router.callback_query(F.data == "add_plan_schedule")
 async def add_old_plan(callback: types.CallbackQuery, state: FSMContext):
-    user = await get_user_by_id(callback.from_user.id)
+    user: Users = await get_user_by_id(callback.from_user.id)
     for deal in user.deals:
         if deal.is_done:
-            await delete_deal(deal.id)
+            await delete_deal(user_id=callback.from_user.id, deal_id=deal.id)
 
     await callback.answer()
     await menu(callback, state)
@@ -210,9 +172,30 @@ async def add_old_plan(callback: types.CallbackQuery, state: FSMContext):
 # Колбэк на отказ от добавления старых задач в новый список
 @plan_callback_router.callback_query(F.data == "del_plan_schedule")
 async def del_old_plan(callback: types.CallbackQuery, state: FSMContext):
-    user = await get_user_by_id(callback.from_user.id)
+    user: Users = await get_user_by_id(callback.from_user.id)
     for deal in user.deals:
-        await delete_deal(deal.id)
+        await delete_deal(user_id=callback.from_user.id, deal_id=deal.id)
 
     await callback.answer()
     await menu(callback, state)
+
+
+# Ежедневная функция оповещения о невыполненных задачах
+async def send_daily_notifications():
+    bot = Bot(token=config.bot_token.get_secret_value())
+    async for batch in get_users_batch_for_notify():
+        for user in batch:
+            await send_notification(bot=bot, user=user)
+
+    await bot.session.close()
+
+
+# Ежедневная функция оповещения о невыполненных задачах
+async def send_notification(bot: Bot, user: Users):
+    deals_list = await user.get_plan_for_schedules()
+    await bot.send_message(
+        user.telegram_id,
+        load_text("plan/scheduled_plan.html").format(deals_list=deals_list),
+        parse_mode="HTML",
+        reply_markup=get_schedule_kb(),
+    )

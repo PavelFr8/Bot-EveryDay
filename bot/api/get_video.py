@@ -18,7 +18,7 @@ async def get_video(video_url: str):
             "Content-Type": "application/json",
         }
         async with sess.post(
-            config.api_url.get_secret_value(),
+            f"{config.api_url.get_secret_value()}",
             json=request_body,
             headers=headers,
         ) as response:
@@ -26,5 +26,5 @@ async def get_video(video_url: str):
                 data = await response.json()
                 return data
             except Exception as e:
-                logger.error(f"Error in request: {e}")
+                await logger.error(f"Error in request: {e}")
                 raise e
