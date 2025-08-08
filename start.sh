@@ -1,13 +1,12 @@
-echo "Проверяем доступность бота по HTTP..."
+#!/bin/sh
+
+echo "Проверяем доступность бота..."
 
 if wget --spider --timeout=5 --tries=3 http://bot.railway.internal:8000/; then
-  echo "Бот доступен"
+  echo "Бот доступен, запускаем nginx..."
+  exec nginx -g 'daemon off;'
 else
-  echo "Бот недоступен"
+  echo "Бот недоступен, перезапускаемся через 10 секунд..."
+  sleep 10
+  exec /start.sh
 fi
-
-echo "Проверка с curl:"
-curl -6 -I --max-time 5 http://bot.railway.internal:8000/
-
-echo "Проверка порта 8000 с помощью nc:"
-nc -z -v -w5 bot.railway.internal 8000 && echo "Порт открыт" || echo "Порт закрыт или нет доступа"
