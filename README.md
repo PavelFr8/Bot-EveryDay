@@ -9,47 +9,47 @@
 
 ---
 
-## 📖 Описание
+## 📖 Description
 
-**Bot DailyHelper** — это Telegram-бот для вашей ежедневной продуктивности.
+**Bot DailyHelper** - Telegram bot for your daily productivity.
 
-Он умеет:
+It can:
 
-* 🗓 **Планировать** — создание и управление списками задач и напоминаниями.
-* 📥 **Скачивать медиа** — видео и аудио по ссылкам с помощью [Cobalt API](https://github.com/imputnet/cobalt).
-* ⚡ Работать **полностью в Docker**, что делает развёртывание простым и быстрым.
-
----
-
-## 🛠 Технологии
-
-| Компонент            | Описание                               |
-| -------------------- | -------------------------------------- |
-| **Python 3.10+**     | Основной язык разработки               |
-| **aiogram 3.x**      | Асинхронный Telegram Bot фреймворк     |
-| **FastAPI**          | Обработка webhook и API-запросов       |
-| **PostgreSQL**       | Надёжная реляционная база данных       |
-| **SQLAlchemy 2.0**   | Асинхронная ORM                        |
-| **Cobalt API**       | Скачивание видео/аудио                 |
-| **Docker + Compose** | Изолированное окружение                |
-| **Nginx**            | Проксирование и маршрутизация запросов |
+* 🗓 **Plan** — create and manage task lists and reminders.
+* 📥 **Download media** — video and audio from links using the [Cobalt API](https://github.com/imputnet/cobalt).
+* ⚡ Run **fully in Docker**, making deployment simple and fast.
 
 ---
 
-## 🚀 Установка и запуск
+## 🛠 Technologies
 
-> Перед началом убедитесь, что установлены [Docker](https://docs.docker.com/get-docker/) и [Docker Compose](https://docs.docker.com/compose/).
+| Component            | Description                         |
+| -------------------- | ----------------------------------- |
+| **Python 3.10+**     | Primary development language        |
+| **aiogram 3.x**      | Asynchronous Telegram Bot framework |
+| **FastAPI**          | Handling webhook and API requests   |
+| **PostgreSQL**       | Reliable relational database        |
+| **SQLAlchemy 2.0**   | Asynchronous ORM                    |
+| **Cobalt API**       | Video/audio downloading             |
+| **Docker + Compose** | Isolated environment                |
+| **Nginx**            | Proxy and request routing           |
 
-### 1. 📂 Клонируйте репозиторий
+---
+
+## 🚀 Installation and Running
+
+> Before starting, make sure you have installed [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/).
+
+### 1. 📂 Clone the repository
 
 ```bash
 git clone https://github.com/PavelFr8/Bot-EveryDay.git
 cd Bot-EveryDay
 ```
 
-### 2. ⚙ Настройте `.env`
+### 2. ⚙ Configure `.env`
 
-Скопируйте шаблон `.env` и заполните его своими значениями:
+Copy the `.env` template and fill it with your values:
 
 ```bash
 # Linux / MacOS
@@ -59,40 +59,40 @@ cp template.env .env
 copy template.env .env
 ```
 
-Укажите:
+Specify:
 
-* `BOT_TOKEN` — токен вашего Telegram-бота
-* `DATABASE_URL` — строка подключения к PostgreSQL
-* `HOST_URL` — внешний URL (ngrok или сервер)
+* `BOT_TOKEN` — your Telegram bot token
+* `DATABASE_URL` — PostgreSQL connection string
+* `HOST_URL` — external URL (ngrok or server)
 
-### 3. 🌐 Запустите туннель
+### 3. 🌐 Run a tunnel
 
-Если используете **ngrok**:
+If you use **ngrok**:
 
 ```bash
 ngrok http 8080
 ```
 
-Скопируйте выданный адрес `https://xxxx.ngrok-free.app` в переменную `HOST_URL` в `.env`.
+Copy the generated address like `https://xxxx.ngrok-free.app` into the `HOST_URL` variable in `.env`.
 
-### 4. 📦 Сборка и запуск контейнеров
+### 4. 📦 Build and run containers
 
 ```bash
 docker compose up -d --build
 ```
 
-После старта контейнеров бот автоматически зарегистрирует вебхук на указанный `HOST_URL`.
+After containers start, the bot will automatically register the webhook at the specified `HOST_URL`.
 
 ---
 
-## 📊 Архитектура
+## 📊 Architecture
 
 ![Bot Structure](docs/structure.svg)
 
 ---
 
-## 📜 Лицензия
+## 📜 License
 
-Проект распространяется под лицензией [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
+This project is licensed under the [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
 
-**Cobalt API** также распространяется под лицензией [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
+**Cobalt API** is also licensed under the [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
