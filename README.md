@@ -5,13 +5,14 @@
 [![Docker](https://img.shields.io/badge/Deployed_with-Docker-blue)](https://www.docker.com/)
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue)](https://www.postgresql.org/)
 
-![Bot Menu Screenshot](imgs/menu.png)
+![Bot Menu Screenshot](docs/menu.png)
 
 ---
 
 ## 📖 Описание
 
 **Bot DailyHelper** — это Telegram-бот для вашей ежедневной продуктивности.
+
 Он умеет:
 
 * 🗓 **Планировать** — создание и управление списками задач и напоминаниями.
@@ -69,7 +70,7 @@ copy template.env .env
 Если используете **ngrok**:
 
 ```bash
-ngrok http 80
+ngrok http 8080
 ```
 
 Скопируйте выданный адрес `https://xxxx.ngrok-free.app` в переменную `HOST_URL` в `.env`.
@@ -86,11 +87,12 @@ docker compose up -d --build
 
 ## 📊 Архитектура
 
-![Bot Structure](imgs/structure.svg)
+![Bot Structure](docs/structure.svg)
 
 ---
 
 ## 📜 Лицензия
 
 Проект распространяется под лицензией [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
+
 **Cobalt API** также распространяется под лицензией [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
