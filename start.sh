@@ -15,6 +15,12 @@ tail -20 /var/log/nginx/error.log || echo "Нет файла логов nginx"
 echo "=== Проверяем доступность бота локально ==="
 curl -v http://bot.railway.internal:8000/ || echo "curl не удался"
 
+echo "=== Проверка конфигурации nginx ==="
+nginx -t
+
+echo "=== Запуск nginx в форграунд режиме ==="
+nginx -g 'daemon off;'
+
 # Проверка доступности бота для старта nginx
 if wget --spider --timeout=5 --tries=3 http://bot.railway.internal:8000/; then
   echo "Бот доступен, запускаем nginx..."
