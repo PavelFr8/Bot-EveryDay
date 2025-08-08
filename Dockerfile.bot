@@ -1,8 +1,9 @@
 FROM python:alpine
 
-WORKDIR /bot
+WORKDIR /app
 
 COPY . .
+
 RUN pip install --no-cache-dir -r requirements/prod.txt
 
 CMD ["sh", "-c", "alembic --config alembic.ini upgrade head && uvicorn run:app --host :: --port 8000"]
