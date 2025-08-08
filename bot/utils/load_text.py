@@ -1,6 +1,6 @@
 from pathlib import Path
 
-TEXTS_DIR = Path(__file__).resolve().parent.parent / "texts"
+TEXTS_DIR = Path(__file__).resolve().parent.parent.parent / "texts"
 
 
 def load_text(filename: str | Path) -> str:
