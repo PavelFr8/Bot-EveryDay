@@ -1,6 +1,6 @@
 FROM python:alpine
 
-WORKDIR /app
+WORKDIR /bot
 
 COPY . .
 
